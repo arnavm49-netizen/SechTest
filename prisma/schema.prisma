@@ -1,0 +1,1062 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  HR_ADMIN
+  MANAGER
+  CANDIDATE
+  RATER
+  ASSESSOR
+}
+
+enum AssessmentLayerCode {
+  COGNITIVE
+  PERSONALITY
+  MOTIVATORS
+  EXECUTION
+  LEADERSHIP
+  SJT
+}
+
+enum ItemType {
+  MCQ
+  FORCED_CHOICE_TRIAD
+  RANKING
+  Q_SORT
+  SCENARIO
+  LIKERT
+  SIMULATION
+  FORCED_CHOICE_PAIR
+  SINGLE_CHOICE_TIMED
+}
+
+enum ItemReviewStatus {
+  DRAFT
+  REVIEWED
+  APPROVED
+  RETIRED
+}
+
+enum AssessmentStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+  EXPIRED
+  INVALIDATED
+}
+
+enum AssessmentVersionStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum RoleFitRecommendation {
+  STRONG_FIT
+  FIT
+  DEVELOP
+  POOR_FIT
+}
+
+enum DevelopmentPlanStatus {
+  DRAFT
+  ACTIVE
+  COMPLETED
+}
+
+enum RaterRelationship {
+  SELF
+  PEER
+  DIRECT_REPORT
+  MANAGER
+  SKIP_LEVEL
+}
+
+enum RaterAssignmentStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+  EXPIRED
+}
+
+enum ValidityType {
+  CONSTRUCT
+  CRITERION
+  INTERNAL_RELIABILITY
+  TEST_RETEST
+  ADVERSE_IMPACT
+  INCREMENTAL
+}
+
+enum MeasurementFrequency {
+  MONTHLY
+  QUARTERLY
+  BIANNUAL
+  ANNUAL
+}
+
+enum CampaignStatus {
+  DRAFT
+  ACTIVE
+  CLOSED
+}
+
+enum CampaignInviteStatus {
+  DRAFT
+  SENT
+  STARTED
+  IN_PROGRESS
+  COMPLETED
+  EXPIRED
+}
+
+enum ScoringModelStatus {
+  DRAFT
+  LIVE
+  CHALLENGER
+  ARCHIVED
+}
+
+enum ScoringRunStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  INVALIDATED
+}
+
+enum ReportType {
+  INDIVIDUAL
+  CANDIDATE_FEEDBACK
+  TEAM_HEATMAP
+  VALIDITY
+  ADVERSE_IMPACT
+  EBITDA
+  TRAJECTORY
+}
+
+enum GovernanceRequestType {
+  ACCESS
+  CHALLENGE
+  DELETE
+  ADVERSE_ACTION_NOTICE
+}
+
+enum GovernanceRequestStatus {
+  OPEN
+  IN_REVIEW
+  APPROVED
+  COMPLETED
+  REJECTED
+}
+
+enum MonitorSeverity {
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum MonitorStatus {
+  HEALTHY
+  WARNING
+  BREACHED
+}
+
+enum AuditAction {
+  LOGIN
+  LOGOUT
+  TOKEN_REFRESH
+  CREATE_USER
+  UPDATE_USER
+  DEACTIVATE_USER
+  BULK_IMPORT_USERS
+  VIEW_SCORE
+  EXPORT_REPORT
+  EDIT_ITEM
+  CHANGE_WEIGHT
+  PUBLISH_VERSION
+  API_REQUEST
+}
+
+model Organization {
+  id                    String              @id @default(cuid())
+  name                  String
+  logo_url              String?
+  dpdp_consent_template String              @db.Text
+  settings              Json?
+  users                 User[]
+  role_families         RoleFamily[]
+  assessments           Assessment[]
+  assessment_versions   AssessmentVersion[]
+  validity_evidence     ValidityEvidence[]
+  kpi_definitions       KpiDefinition[]
+  norm_groups           NormGroup[]
+  campaigns             Campaign[]
+  scoring_models        ScoringModel[]
+  report_templates      ReportTemplate[]
+  governance_requests   GovernanceRequest[]
+  system_health_checks  SystemHealthCheck[]
+  created_at            DateTime            @default(now())
+  updated_at            DateTime            @updatedAt
+  deleted_at            DateTime?
+
+  @@map("organizations")
+}
+
+model User {
+  id                            String              @id @default(cuid())
+  org_id                        String
+  email                         String              @unique
+  name                          String
+  role                          UserRole
+  password_hash                 String
+  is_active                     Boolean             @default(true)
+  last_login                    DateTime?
+  manager_id                    String?
+  job_title                     String?
+  department                    String?
+  demographic_group             String?
+  profile                       Json?
+  manager_quality_score         Float?
+  organization                  Organization        @relation(fields: [org_id], references: [id])
+  manager                       User?               @relation("UserManager", fields: [manager_id], references: [id])
+  direct_reports                User[]              @relation("UserManager")
+  assessments                   Assessment[]        @relation("CandidateAssessments")
+  created_role_families         RoleFamily[]        @relation("RoleFamilyCreatedBy")
+  created_items                 Item[]              @relation("ItemCreatedBy")
+  changed_question_versions     QuestionVersion[]   @relation("QuestionVersionChangedBy")
+  published_assessment_versions AssessmentVersion[] @relation("AssessmentVersionPublishedBy")
+  development_plans             DevelopmentPlan[]
+  subject_rater_assignments     RaterAssignment[]   @relation("RaterAssignmentSubject")
+  rater_assignments             RaterAssignment[]   @relation("RaterAssignmentRater")
+  kpi_observations              KpiObservation[]
+  outcome_records               OutcomeRecord[]
+  campaign_invites              CampaignInvite[]
+  audit_logs                    AuditLog[]
+  consent_records               ConsentRecord[]
+  created_campaigns             Campaign[]          @relation("CampaignCreatedBy")
+  generated_reports             GeneratedReport[]   @relation("GeneratedReportGeneratedBy")
+  created_scoring_models        ScoringModel[]      @relation("ScoringModelCreatedBy")
+  published_scoring_models      ScoringModel[]      @relation("ScoringModelPublishedBy")
+  norm_group_memberships        NormGroupMember[]   @relation("NormGroupMemberUser")
+  refresh_tokens                RefreshToken[]
+  governance_requests           GovernanceRequest[] @relation("GovernanceRequestUser")
+  reviewed_governance_requests  GovernanceRequest[] @relation("GovernanceRequestReviewedBy")
+  created_at                    DateTime            @default(now())
+  updated_at                    DateTime            @updatedAt
+  deleted_at                    DateTime?
+
+  @@index([org_id, role])
+  @@index([org_id, is_active])
+  @@index([manager_id])
+  @@index([org_id, demographic_group])
+  @@map("users")
+}
+
+model AssessmentLayer {
+  id                  String              @id @default(cuid())
+  code                AssessmentLayerCode @unique
+  name                String
+  description         String              @db.Text
+  default_weight      Float
+  predictive_evidence String              @db.Text
+  is_active           Boolean             @default(true)
+  sub_dimensions      SubDimension[]
+  items               Item[]
+  assessment_sections AssessmentSection[]
+  scores              Score[]
+  scored_responses    ScoredResponse[]
+  validity_evidence   ValidityEvidence[]
+  created_at          DateTime            @default(now())
+  updated_at          DateTime            @updatedAt
+  deleted_at          DateTime?
+
+  @@index([is_active])
+  @@map("assessment_layers")
+}
+
+model RoleFamily {
+  id                String             @id @default(cuid())
+  org_id            String
+  name              String
+  description       String             @db.Text
+  weight_matrix     Json
+  is_active         Boolean            @default(true)
+  version           Int                @default(1)
+  created_by        String?
+  organization      Organization       @relation(fields: [org_id], references: [id])
+  creator           User?              @relation("RoleFamilyCreatedBy", fields: [created_by], references: [id])
+  assessments       Assessment[]
+  role_fit_results  RoleFitResult[]
+  validity_evidence ValidityEvidence[]
+  kpi_definitions   KpiDefinition[]
+  campaigns         Campaign[]
+  created_at        DateTime           @default(now())
+  updated_at        DateTime           @updatedAt
+  deleted_at        DateTime?
+
+  @@unique([org_id, name])
+  @@index([org_id, is_active])
+  @@index([weight_matrix], type: Gin)
+  @@map("role_families")
+}
+
+model SubDimension {
+  id                          String                      @id @default(cuid())
+  layer_id                    String
+  code                        String
+  name                        String
+  description                 String                      @db.Text
+  target_alpha                Float                       @default(0.75)
+  is_active                   Boolean                     @default(true)
+  assessment_layer            AssessmentLayer             @relation(fields: [layer_id], references: [id])
+  items                       Item[]
+  scores                      Score[]
+  validity_evidence           ValidityEvidence[]
+  behaviour_maps              BehaviourMap[]
+  norm_statistics             NormStatistic[]
+  scored_responses            ScoredResponse[]
+  development_recommendations DevelopmentRecommendation[]
+  created_at                  DateTime                    @default(now())
+  updated_at                  DateTime                    @updatedAt
+  deleted_at                  DateTime?
+
+  @@unique([layer_id, code])
+  @@index([layer_id, is_active])
+  @@map("sub_dimensions")
+}
+
+model Item {
+  id                  String            @id @default(cuid())
+  layer_id            String
+  sub_dimension_id    String?
+  item_type           ItemType
+  stem                String            @db.Text
+  options             Json?
+  correct_answer      Json?
+  scoring_key         Json?
+  difficulty_b        Float?
+  discrimination_a    Float?
+  guessing_c          Float?
+  time_limit_seconds  Int?
+  is_active           Boolean           @default(true)
+  version             Int               @default(1)
+  exposure_count      Int               @default(0)
+  max_exposure_pct    Float             @default(30)
+  last_used_at        DateTime?
+  tags                Json?
+  created_by          String?
+  review_status       ItemReviewStatus  @default(DRAFT)
+  desirability_rating Float?
+  assessment_layer    AssessmentLayer   @relation(fields: [layer_id], references: [id])
+  sub_dimension       SubDimension?     @relation(fields: [sub_dimension_id], references: [id])
+  creator             User?             @relation("ItemCreatedBy", fields: [created_by], references: [id])
+  item_options        ItemOption[]
+  question_versions   QuestionVersion[]
+  responses           Response[]
+  rater_responses     RaterResponse[]
+  scored_responses    ScoredResponse[]
+  created_at          DateTime          @default(now())
+  updated_at          DateTime          @updatedAt
+  deleted_at          DateTime?
+
+  @@index([layer_id, sub_dimension_id])
+  @@index([id, is_active])
+  @@index([review_status, is_active])
+  @@index([tags], type: Gin)
+  @@index([options], type: Gin)
+  @@map("items")
+}
+
+model ItemOption {
+  id            String    @id @default(cuid())
+  item_id       String
+  option_text   String    @db.Text
+  score_weight  Float     @default(0)
+  is_correct    Boolean   @default(false)
+  display_order Int
+  item          Item      @relation(fields: [item_id], references: [id], onDelete: Cascade)
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+  deleted_at    DateTime?
+
+  @@index([item_id, display_order])
+  @@map("item_options")
+}
+
+model QuestionVersion {
+  id                   String    @id @default(cuid())
+  item_id              String
+  version_number       Int
+  stem_snapshot        String    @db.Text
+  options_snapshot     Json?
+  scoring_key_snapshot Json?
+  changed_by           String?
+  changed_at           DateTime  @default(now())
+  change_notes         String?   @db.Text
+  item                 Item      @relation(fields: [item_id], references: [id], onDelete: Cascade)
+  changer              User?     @relation("QuestionVersionChangedBy", fields: [changed_by], references: [id])
+  created_at           DateTime  @default(now())
+  updated_at           DateTime  @updatedAt
+  deleted_at           DateTime?
+
+  @@unique([item_id, version_number])
+  @@map("question_versions")
+}
+
+model AssessmentVersion {
+  id                      String                  @id @default(cuid())
+  org_id                  String
+  version_label           String
+  sections_snapshot       Json
+  scoring_config_snapshot Json
+  status                  AssessmentVersionStatus @default(DRAFT)
+  published_at            DateTime?
+  published_by            String?
+  organization            Organization            @relation(fields: [org_id], references: [id])
+  publisher               User?                   @relation("AssessmentVersionPublishedBy", fields: [published_by], references: [id])
+  assessments             Assessment[]
+  campaigns               Campaign[]
+  created_at              DateTime                @default(now())
+  updated_at              DateTime                @updatedAt
+  deleted_at              DateTime?
+
+  @@unique([org_id, version_label])
+  @@map("assessment_versions")
+}
+
+model Assessment {
+  id                     String              @id @default(cuid())
+  org_id                 String
+  candidate_id           String
+  campaign_id            String?
+  role_family_id         String
+  assessment_version_id  String
+  status                 AssessmentStatus    @default(NOT_STARTED)
+  started_at             DateTime?
+  completed_at           DateTime?
+  total_time_seconds     Int?
+  consent_given_at       DateTime?
+  proctor_mode           Boolean             @default(false)
+  is_high_stakes         Boolean             @default(false)
+  runtime_metadata       Json?
+  quality_flags          Json?
+  organization           Organization        @relation(fields: [org_id], references: [id])
+  candidate              User                @relation("CandidateAssessments", fields: [candidate_id], references: [id])
+  campaign               Campaign?           @relation(fields: [campaign_id], references: [id])
+  role_family            RoleFamily          @relation(fields: [role_family_id], references: [id])
+  assessment_version     AssessmentVersion   @relation(fields: [assessment_version_id], references: [id])
+  sections               AssessmentSection[]
+  responses              Response[]
+  scores                 Score[]
+  role_fit_results       RoleFitResult[]
+  development_plans      DevelopmentPlan[]
+  rater_assignments      RaterAssignment[]
+  consent_records        ConsentRecord[]
+  generated_reports      GeneratedReport[]
+  governance_requests    GovernanceRequest[]
+  outcome_records        OutcomeRecord[]
+  campaign_invites       CampaignInvite[]
+  scoring_runs           ScoringRun[]
+  norm_group_memberships NormGroupMember[]
+  created_at             DateTime            @default(now())
+  updated_at             DateTime            @updatedAt
+  deleted_at             DateTime?
+
+  @@index([org_id, role_family_id])
+  @@index([candidate_id, status])
+  @@index([campaign_id, status])
+  @@map("assessments")
+}
+
+model AssessmentSection {
+  id                      String           @id @default(cuid())
+  assessment_id           String
+  layer_id                String
+  status                  AssessmentStatus @default(NOT_STARTED)
+  started_at              DateTime?
+  completed_at            DateTime?
+  item_ids_snapshot       Json?
+  runtime_config_snapshot Json?
+  time_limit_seconds      Int?
+  items_presented         Int              @default(0)
+  items_answered          Int              @default(0)
+  dropout_flag            Boolean          @default(false)
+  section_order           Int
+  assessment              Assessment       @relation(fields: [assessment_id], references: [id], onDelete: Cascade)
+  assessment_layer        AssessmentLayer  @relation(fields: [layer_id], references: [id])
+  responses               Response[]
+  created_at              DateTime         @default(now())
+  updated_at              DateTime         @updatedAt
+  deleted_at              DateTime?
+
+  @@unique([assessment_id, layer_id])
+  @@index([assessment_id, layer_id])
+  @@map("assessment_sections")
+}
+
+model Response {
+  id                    String            @id @default(cuid())
+  assessment_id         String
+  section_id            String
+  item_id               String
+  response_value        Json?
+  response_time_seconds Int?
+  is_flagged            Boolean           @default(false)
+  irt_theta_estimate    Float?
+  sequence_number       Int
+  assessment            Assessment        @relation(fields: [assessment_id], references: [id], onDelete: Cascade)
+  section               AssessmentSection @relation(fields: [section_id], references: [id], onDelete: Cascade)
+  item                  Item              @relation(fields: [item_id], references: [id])
+  scored_responses      ScoredResponse[]
+  created_at            DateTime          @default(now())
+  updated_at            DateTime          @updatedAt
+  deleted_at            DateTime?
+
+  @@unique([assessment_id, sequence_number])
+  @@index([assessment_id, section_id])
+  @@map("responses")
+}
+
+model Score {
+  id                     String          @id @default(cuid())
+  assessment_id          String
+  layer_id               String
+  sub_dimension_id       String?
+  raw_score              Float?
+  z_score                Float?
+  percentile             Float?
+  normalized_score_0_100 Float?
+  irt_theta              Float?
+  reliability_estimate   Float?
+  is_valid               Boolean         @default(true)
+  scoring_model_version  String
+  assessment             Assessment      @relation(fields: [assessment_id], references: [id], onDelete: Cascade)
+  assessment_layer       AssessmentLayer @relation(fields: [layer_id], references: [id])
+  sub_dimension          SubDimension?   @relation(fields: [sub_dimension_id], references: [id])
+  created_at             DateTime        @default(now())
+  updated_at             DateTime        @updatedAt
+  deleted_at             DateTime?
+
+  @@index([assessment_id, layer_id])
+  @@map("scores")
+}
+
+model RoleFitResult {
+  id                String                @id @default(cuid())
+  assessment_id     String
+  role_family_id    String
+  fit_score_pct     Float
+  rank_in_cohort    Int?
+  top_3_drivers     Json?
+  top_2_constraints Json?
+  recommendation    RoleFitRecommendation
+  assessment        Assessment            @relation(fields: [assessment_id], references: [id], onDelete: Cascade)
+  role_family       RoleFamily            @relation(fields: [role_family_id], references: [id])
+  created_at        DateTime              @default(now())
+  updated_at        DateTime              @updatedAt
+  deleted_at        DateTime?
+
+  @@unique([assessment_id, role_family_id])
+  @@map("role_fit_results")
+}
+
+model DevelopmentPlan {
+  id                  String                @id @default(cuid())
+  assessment_id       String
+  user_id             String
+  gap_dimensions      Json
+  status              DevelopmentPlanStatus @default(DRAFT)
+  manager_reviewed_at DateTime?
+  assessment          Assessment            @relation(fields: [assessment_id], references: [id], onDelete: Cascade)
+  user                User                  @relation(fields: [user_id], references: [id])
+  created_at          DateTime              @default(now())
+  updated_at          DateTime              @updatedAt
+  deleted_at          DateTime?
+
+  @@index([user_id, assessment_id])
+  @@map("development_plans")
+}
+
+model RaterAssignment {
+  id                    String                @id @default(cuid())
+  subject_id            String
+  rater_id              String
+  relationship          RaterRelationship
+  assessment_id         String
+  status                RaterAssignmentStatus @default(NOT_STARTED)
+  calibration_completed Boolean               @default(false)
+  subject               User                  @relation("RaterAssignmentSubject", fields: [subject_id], references: [id])
+  rater                 User                  @relation("RaterAssignmentRater", fields: [rater_id], references: [id])
+  assessment            Assessment            @relation(fields: [assessment_id], references: [id], onDelete: Cascade)
+  rater_responses       RaterResponse[]
+  created_at            DateTime              @default(now())
+  updated_at            DateTime              @updatedAt
+  deleted_at            DateTime?
+
+  @@unique([assessment_id, subject_id, rater_id, relationship])
+  @@index([subject_id, assessment_id])
+  @@map("rater_assignments")
+}
+
+model RaterResponse {
+  id                    String          @id @default(cuid())
+  rater_assignment_id   String
+  item_id               String
+  response_value        Json?
+  response_time_seconds Int?
+  rater_assignment      RaterAssignment @relation(fields: [rater_assignment_id], references: [id], onDelete: Cascade)
+  item                  Item            @relation(fields: [item_id], references: [id])
+  created_at            DateTime        @default(now())
+  updated_at            DateTime        @updatedAt
+  deleted_at            DateTime?
+
+  @@unique([rater_assignment_id, item_id])
+  @@map("rater_responses")
+}
+
+model ValidityEvidence {
+  id               String           @id @default(cuid())
+  org_id           String
+  validity_type    ValidityType
+  layer_id         String?
+  sub_dimension_id String?
+  role_family_id   String?
+  metric_name      String
+  metric_value     Float
+  threshold        Float
+  pass_fail        Boolean
+  computed_at      DateTime         @default(now())
+  sample_n         Int
+  notes            String?          @db.Text
+  organization     Organization     @relation(fields: [org_id], references: [id])
+  assessment_layer AssessmentLayer? @relation(fields: [layer_id], references: [id])
+  sub_dimension    SubDimension?    @relation(fields: [sub_dimension_id], references: [id])
+  role_family      RoleFamily?      @relation(fields: [role_family_id], references: [id])
+  created_at       DateTime         @default(now())
+  updated_at       DateTime         @updatedAt
+  deleted_at       DateTime?
+
+  @@index([org_id, validity_type])
+  @@map("validity_evidence")
+}
+
+model KpiDefinition {
+  id                        String               @id @default(cuid())
+  org_id                    String
+  role_family_id            String
+  kpi_name                  String
+  kpi_description           String               @db.Text
+  measurement_unit          String
+  measurement_frequency     MeasurementFrequency
+  data_source               String
+  prediction_horizon_months Int
+  organization              Organization         @relation(fields: [org_id], references: [id])
+  role_family               RoleFamily           @relation(fields: [role_family_id], references: [id])
+  kpi_observations          KpiObservation[]
+  outcome_records           OutcomeRecord[]
+  created_at                DateTime             @default(now())
+  updated_at                DateTime             @updatedAt
+  deleted_at                DateTime?
+
+  @@index([org_id, role_family_id])
+  @@map("kpi_definitions")
+}
+
+model KpiObservation {
+  id                String        @id @default(cuid())
+  user_id           String
+  kpi_definition_id String
+  observation_date  DateTime
+  value             Float
+  period_start      DateTime
+  period_end        DateTime
+  user              User          @relation(fields: [user_id], references: [id])
+  kpi_definition    KpiDefinition @relation(fields: [kpi_definition_id], references: [id], onDelete: Cascade)
+  created_at        DateTime      @default(now())
+  updated_at        DateTime      @updatedAt
+  deleted_at        DateTime?
+
+  @@index([user_id, kpi_definition_id])
+  @@map("kpi_observations")
+}
+
+model OutcomeRecord {
+  id                 String        @id @default(cuid())
+  user_id            String
+  assessment_id      String
+  kpi_definition_id  String
+  metric_name        String
+  metric_value       Float
+  observation_period String
+  imported_at        DateTime      @default(now())
+  user               User          @relation(fields: [user_id], references: [id])
+  assessment         Assessment    @relation(fields: [assessment_id], references: [id], onDelete: Cascade)
+  kpi_definition     KpiDefinition @relation(fields: [kpi_definition_id], references: [id])
+  created_at         DateTime      @default(now())
+  updated_at         DateTime      @updatedAt
+  deleted_at         DateTime?
+
+  @@index([user_id, assessment_id])
+  @@map("outcome_records")
+}
+
+model BehaviourMap {
+  id                    String       @id @default(cuid())
+  sub_dimension_id      String
+  behaviour_description String       @db.Text
+  outcome_description   String       @db.Text
+  is_active             Boolean      @default(true)
+  sub_dimension         SubDimension @relation(fields: [sub_dimension_id], references: [id])
+  created_at            DateTime     @default(now())
+  updated_at            DateTime     @updatedAt
+  deleted_at            DateTime?
+
+  @@index([sub_dimension_id, is_active])
+  @@map("behaviour_maps")
+}
+
+model AuditLog {
+  id            String      @id @default(cuid())
+  user_id       String?
+  action        AuditAction
+  target_entity String
+  target_id     String?
+  metadata      Json?
+  ip_address    String?
+  timestamp     DateTime    @default(now())
+  user          User?       @relation(fields: [user_id], references: [id])
+  created_at    DateTime    @default(now())
+  updated_at    DateTime    @updatedAt
+  deleted_at    DateTime?
+
+  @@index([user_id, timestamp])
+  @@map("audit_log")
+}
+
+model ConsentRecord {
+  id                String     @id @default(cuid())
+  user_id           String
+  assessment_id     String
+  consent_text_hash String
+  consented_at      DateTime   @default(now())
+  ip_address        String?
+  user              User       @relation(fields: [user_id], references: [id])
+  assessment        Assessment @relation(fields: [assessment_id], references: [id], onDelete: Cascade)
+  created_at        DateTime   @default(now())
+  updated_at        DateTime   @updatedAt
+  deleted_at        DateTime?
+
+  @@unique([user_id, assessment_id])
+  @@index([user_id, assessment_id])
+  @@map("consent_records")
+}
+
+model GovernanceRequest {
+  id              String                  @id @default(cuid())
+  org_id          String
+  user_id         String
+  assessment_id   String?
+  request_type    GovernanceRequestType
+  status          GovernanceRequestStatus @default(OPEN)
+  request_note    String                  @db.Text
+  resolution_note String?                 @db.Text
+  due_at          DateTime?
+  reviewed_by     String?
+  reviewed_at     DateTime?
+  resolved_at     DateTime?
+  metadata        Json?
+  organization    Organization            @relation(fields: [org_id], references: [id])
+  user            User                    @relation("GovernanceRequestUser", fields: [user_id], references: [id])
+  reviewer        User?                   @relation("GovernanceRequestReviewedBy", fields: [reviewed_by], references: [id])
+  assessment      Assessment?             @relation(fields: [assessment_id], references: [id], onDelete: Cascade)
+  created_at      DateTime                @default(now())
+  updated_at      DateTime                @updatedAt
+  deleted_at      DateTime?
+
+  @@index([org_id, request_type, status])
+  @@index([user_id, status])
+  @@map("governance_requests")
+}
+
+model NormGroup {
+  id              String            @id @default(cuid())
+  org_id          String
+  name            String
+  description     String            @db.Text
+  member_count    Int               @default(0)
+  is_active       Boolean           @default(true)
+  organization    Organization      @relation(fields: [org_id], references: [id])
+  norm_statistics NormStatistic[]
+  members         NormGroupMember[]
+  created_at      DateTime          @default(now())
+  updated_at      DateTime          @updatedAt
+  deleted_at      DateTime?
+
+  @@unique([org_id, name])
+  @@index([org_id, is_active])
+  @@map("norm_groups")
+}
+
+model NormStatistic {
+  id                String       @id @default(cuid())
+  norm_group_id     String
+  sub_dimension_id  String
+  mean              Float
+  std_dev           Float
+  percentile_lookup Json
+  computed_at       DateTime     @default(now())
+  sample_n          Int
+  norm_group        NormGroup    @relation(fields: [norm_group_id], references: [id], onDelete: Cascade)
+  sub_dimension     SubDimension @relation(fields: [sub_dimension_id], references: [id])
+  created_at        DateTime     @default(now())
+  updated_at        DateTime     @updatedAt
+  deleted_at        DateTime?
+
+  @@unique([norm_group_id, sub_dimension_id])
+  @@map("norm_statistics")
+}
+
+model NormGroupMember {
+  id            String     @id @default(cuid())
+  norm_group_id String
+  assessment_id String
+  user_id       String
+  norm_group    NormGroup  @relation(fields: [norm_group_id], references: [id], onDelete: Cascade)
+  assessment    Assessment @relation(fields: [assessment_id], references: [id], onDelete: Cascade)
+  user          User       @relation("NormGroupMemberUser", fields: [user_id], references: [id])
+  created_at    DateTime   @default(now())
+  updated_at    DateTime   @updatedAt
+  deleted_at    DateTime?
+
+  @@unique([norm_group_id, assessment_id])
+  @@index([user_id, norm_group_id])
+  @@map("norm_group_members")
+}
+
+model ScoringModel {
+  id            String             @id @default(cuid())
+  org_id        String
+  name          String
+  version_label String
+  status        ScoringModelStatus @default(DRAFT)
+  engine_mode   String
+  config        Json
+  notes         String?            @db.Text
+  created_by    String?
+  published_by  String?
+  published_at  DateTime?
+  organization  Organization       @relation(fields: [org_id], references: [id])
+  creator       User?              @relation("ScoringModelCreatedBy", fields: [created_by], references: [id])
+  publisher     User?              @relation("ScoringModelPublishedBy", fields: [published_by], references: [id])
+  scoring_runs  ScoringRun[]
+  created_at    DateTime           @default(now())
+  updated_at    DateTime           @updatedAt
+  deleted_at    DateTime?
+
+  @@unique([org_id, version_label])
+  @@index([org_id, status])
+  @@map("scoring_models")
+}
+
+model ScoringRun {
+  id                  String           @id @default(cuid())
+  assessment_id       String
+  scoring_model_id    String
+  status              ScoringRunStatus @default(PENDING)
+  quality_gate_passed Boolean          @default(true)
+  invalid_reason      String?          @db.Text
+  step_outputs        Json?
+  started_at          DateTime         @default(now())
+  completed_at        DateTime?
+  assessment          Assessment       @relation(fields: [assessment_id], references: [id], onDelete: Cascade)
+  scoring_model       ScoringModel     @relation(fields: [scoring_model_id], references: [id])
+  scored_responses    ScoredResponse[]
+  created_at          DateTime         @default(now())
+  updated_at          DateTime         @updatedAt
+  deleted_at          DateTime?
+
+  @@index([assessment_id, created_at])
+  @@index([scoring_model_id, status])
+  @@map("scoring_runs")
+}
+
+model ScoredResponse {
+  id               String          @id @default(cuid())
+  scoring_run_id   String
+  response_id      String
+  item_id          String
+  layer_id         String
+  sub_dimension_id String?
+  raw_value        Json?
+  scored_value     Float?
+  speed_score      Float?
+  explanation      Json?
+  quality_flags    Json?
+  scoring_run      ScoringRun      @relation(fields: [scoring_run_id], references: [id], onDelete: Cascade)
+  response         Response        @relation(fields: [response_id], references: [id], onDelete: Cascade)
+  item             Item            @relation(fields: [item_id], references: [id])
+  assessment_layer AssessmentLayer @relation(fields: [layer_id], references: [id])
+  sub_dimension    SubDimension?   @relation(fields: [sub_dimension_id], references: [id])
+  created_at       DateTime        @default(now())
+  updated_at       DateTime        @updatedAt
+  deleted_at       DateTime?
+
+  @@unique([scoring_run_id, response_id])
+  @@index([item_id, layer_id])
+  @@map("scored_responses")
+}
+
+model Campaign {
+  id                    String            @id @default(cuid())
+  org_id                String
+  name                  String
+  assessment_version_id String
+  role_family_id        String
+  status                CampaignStatus    @default(DRAFT)
+  invite_template       String            @db.Text
+  reminder_template     String            @db.Text
+  settings              Json?
+  deadline              DateTime?
+  created_by            String?
+  organization          Organization      @relation(fields: [org_id], references: [id])
+  assessment_version    AssessmentVersion @relation(fields: [assessment_version_id], references: [id])
+  role_family           RoleFamily        @relation(fields: [role_family_id], references: [id])
+  creator               User?             @relation("CampaignCreatedBy", fields: [created_by], references: [id])
+  assessments           Assessment[]
+  invites               CampaignInvite[]
+  created_at            DateTime          @default(now())
+  updated_at            DateTime          @updatedAt
+  deleted_at            DateTime?
+
+  @@index([org_id, role_family_id])
+  @@map("campaigns")
+}
+
+model CampaignInvite {
+  id               String               @id @default(cuid())
+  campaign_id      String
+  candidate_id     String?
+  assessment_id    String?
+  email            String
+  invite_token     String               @unique
+  status           CampaignInviteStatus @default(DRAFT)
+  invited_at       DateTime?
+  started_at       DateTime?
+  completed_at     DateTime?
+  expires_at       DateTime?
+  reminder_count   Int                  @default(0)
+  last_reminded_at DateTime?
+  metadata         Json?
+  campaign         Campaign             @relation(fields: [campaign_id], references: [id], onDelete: Cascade)
+  candidate        User?                @relation(fields: [candidate_id], references: [id])
+  assessment       Assessment?          @relation(fields: [assessment_id], references: [id])
+  created_at       DateTime             @default(now())
+  updated_at       DateTime             @updatedAt
+  deleted_at       DateTime?
+
+  @@index([campaign_id, status])
+  @@index([candidate_id, status])
+  @@map("campaign_invites")
+}
+
+model ReportTemplate {
+  id                 String            @id @default(cuid())
+  org_id             String
+  name               String
+  report_type        ReportType
+  sections_config    Json
+  branding           Json
+  distribution_rules Json
+  is_active          Boolean           @default(true)
+  organization       Organization      @relation(fields: [org_id], references: [id])
+  generated_reports  GeneratedReport[]
+  created_at         DateTime          @default(now())
+  updated_at         DateTime          @updatedAt
+  deleted_at         DateTime?
+
+  @@unique([org_id, name])
+  @@index([org_id, report_type, is_active])
+  @@map("report_templates")
+}
+
+model GeneratedReport {
+  id                 String         @id @default(cuid())
+  assessment_id      String
+  report_template_id String
+  file_url           String
+  generated_at       DateTime       @default(now())
+  generated_by       String?
+  assessment         Assessment     @relation(fields: [assessment_id], references: [id], onDelete: Cascade)
+  report_template    ReportTemplate @relation(fields: [report_template_id], references: [id])
+  generator          User?          @relation("GeneratedReportGeneratedBy", fields: [generated_by], references: [id])
+  created_at         DateTime       @default(now())
+  updated_at         DateTime       @updatedAt
+  deleted_at         DateTime?
+
+  @@index([assessment_id, report_template_id])
+  @@map("generated_reports")
+}
+
+model SystemHealthCheck {
+  id              String          @id @default(cuid())
+  org_id          String
+  check_code      String
+  title           String
+  severity        MonitorSeverity
+  status          MonitorStatus
+  detail          String          @db.Text
+  trigger_summary String?
+  metadata        Json?
+  checked_at      DateTime        @default(now())
+  next_review_at  DateTime?
+  organization    Organization    @relation(fields: [org_id], references: [id])
+  created_at      DateTime        @default(now())
+  updated_at      DateTime        @updatedAt
+  deleted_at      DateTime?
+
+  @@unique([org_id, check_code])
+  @@index([org_id, severity, status])
+  @@map("system_health_checks")
+}
+
+model DevelopmentRecommendation {
+  id                   String       @id @default(cuid())
+  sub_dimension_id     String
+  score_range_min      Float
+  score_range_max      Float
+  recommendation_text  String       @db.Text
+  timeline             String
+  reassessment_trigger String
+  is_active            Boolean      @default(true)
+  sub_dimension        SubDimension @relation(fields: [sub_dimension_id], references: [id])
+  created_at           DateTime     @default(now())
+  updated_at           DateTime     @updatedAt
+  deleted_at           DateTime?
+
+  @@index([sub_dimension_id, is_active])
+  @@map("development_recommendations")
+}
+
+model RefreshToken {
+  id         String    @id @default(cuid())
+  user_id    String
+  token_hash String    @unique
+  expires_at DateTime
+  revoked_at DateTime?
+  ip_address String?
+  user_agent String?
+  user       User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  deleted_at DateTime?
+
+  @@index([user_id, expires_at])
+  @@map("refresh_tokens")
+}
