@@ -1,5 +1,6 @@
 import { prisma } from "../src/lib/db";
-import { ensure_demo_super_admin, seed_demo_dataset } from "./seed";
+import { ensure_demo_super_admin } from "../src/lib/demo-access";
+import { seed_demo_dataset } from "./seed";
 
 async function main() {
   const organization_count = await prisma.organization.count();

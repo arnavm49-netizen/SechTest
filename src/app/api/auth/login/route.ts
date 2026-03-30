@@ -10,6 +10,7 @@ import {
   issue_access_token,
 } from "@/lib/auth/tokens";
 import { prisma } from "@/lib/db";
+import { ensure_demo_super_admin, is_demo_super_admin_credentials } from "@/lib/demo-access";
 import { enforce_rate_limit } from "@/lib/rate-limit";
 
 const login_schema = z.object({
@@ -39,33 +40,54 @@ export async function POST(request: NextRequest) {
   }
 
   const email = parsed.data.email.trim().toLowerCase();
-  const user = await prisma.user.findUnique({
+  let user = await prisma.user.findUnique({
     where: { email },
   });
+
+  if ((!user || !user.is_active) && is_demo_super_admin_credentials(email, parsed.data.password)) {
+    await ensure_demo_super_admin({ reset_password: true });
+    user = await prisma.user.findUnique({
+      where: { email },
+    });
+  }
 
   if (!user || !user.is_active) {
     return NextResponse.json({ message: "Invalid credentials." }, { status: 401 });
   }
 
-  const is_valid_password = await verify_password(parsed.data.password, user.password_hash);
+  let is_valid_password = await verify_password(parsed.data.password, user.password_hash);
+
+  if (!is_valid_password && is_demo_super_admin_credentials(email, parsed.data.password)) {
+    await ensure_demo_super_admin({ org_id: user.org_id, reset_password: true });
+    user = await prisma.user.findUnique({
+      where: { email },
+    });
+    is_valid_password = user ? await verify_password(parsed.data.password, user.password_hash) : false;
+  }
 
   if (!is_valid_password) {
+    return NextResponse.json({ message: "Invalid credentials." }, { status: 401 });
+  }
+
+  const authenticated_user = user;
+
+  if (!authenticated_user) {
     return NextResponse.json({ message: "Invalid credentials." }, { status: 401 });
   }
 
   const refresh_token = create_refresh_token();
   const refresh_expires_at = get_refresh_expiry();
   const access_token = await issue_access_token({
-    email: user.email,
-    id: user.id,
-    name: user.name,
-    org_id: user.org_id,
-    role: user.role,
+    email: authenticated_user.email,
+    id: authenticated_user.id,
+    name: authenticated_user.name,
+    org_id: authenticated_user.org_id,
+    role: authenticated_user.role,
   });
 
   await prisma.$transaction(async (tx) => {
     await tx.user.update({
-      where: { id: user.id },
+      where: { id: authenticated_user.id },
       data: {
         last_login: new Date(),
       },
@@ -77,7 +99,7 @@ export async function POST(request: NextRequest) {
         ip_address,
         token_hash: hash_refresh_token(refresh_token),
         user_agent: request.headers.get("user-agent"),
-        user_id: user.id,
+        user_id: authenticated_user.id,
       },
     });
   });
@@ -85,10 +107,10 @@ export async function POST(request: NextRequest) {
   await log_audit_event({
     action: "LOGIN",
     ip_address,
-    metadata: { method: "POST", path: "/api/auth/login", role: user.role },
+    metadata: { method: "POST", path: "/api/auth/login", role: authenticated_user.role },
     target_entity: "auth_session",
-    target_id: user.id,
-    user_id: user.id,
+    target_id: authenticated_user.id,
+    user_id: authenticated_user.id,
   });
 
   await log_audit_event({
@@ -96,17 +118,17 @@ export async function POST(request: NextRequest) {
     ip_address,
     metadata: { method: "POST", path: "/api/auth/login", status: 200 },
     target_entity: "auth.login",
-    target_id: user.id,
-    user_id: user.id,
+    target_id: authenticated_user.id,
+    user_id: authenticated_user.id,
   });
 
   const response = NextResponse.json({
     message: "Login successful.",
     user: {
-      email: user.email,
-      id: user.id,
-      name: user.name,
-      role: user.role,
+      email: authenticated_user.email,
+      id: authenticated_user.id,
+      name: authenticated_user.name,
+      role: authenticated_user.role,
     },
   });
 

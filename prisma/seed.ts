@@ -4,6 +4,7 @@ import { hash_password } from "../src/lib/auth/password";
 import { complete_assessment_from_invite, record_assessment_consent, save_assessment_response, start_assessment_from_invite } from "../src/lib/assessment-runtime";
 import type { AssessmentPublicItem } from "../src/lib/assessment-session";
 import { prisma } from "../src/lib/db";
+import { DEMO_PASSWORD, DEMO_SUPER_ADMIN_EMAIL, DEMO_SUPER_ADMIN_NAME } from "../src/lib/demo-access";
 import { default_scoring_model_config } from "../src/lib/scoring/config";
 import { run_scoring_for_assessment } from "../src/lib/scoring-service";
 import { build_step_two_question_bank } from "../src/lib/seed/question-bank";
@@ -11,59 +12,6 @@ import { build_step_two_question_bank } from "../src/lib/seed/question-bank";
 type SeedOptions = {
   purge_existing?: boolean;
 };
-
-export const DEMO_SUPER_ADMIN_EMAIL = "superadmin@secheron.example.com";
-export const DEMO_SUPER_ADMIN_NAME = "Aarav Kulkarni";
-export const DEMO_PASSWORD = "Password@123";
-
-export async function ensure_demo_super_admin(options: {
-  org_id?: string;
-  reset_password?: boolean;
-} = {}) {
-  const organization =
-    options.org_id
-      ? await prisma.organization.findUnique({
-          where: { id: options.org_id },
-        })
-      : await prisma.organization.findFirst({
-          where: { deleted_at: null },
-          orderBy: [{ created_at: "asc" }],
-        });
-
-  if (!organization) {
-    return null;
-  }
-
-  const password_hash = await hash_password(DEMO_PASSWORD);
-  const existing_user = await prisma.user.findUnique({
-    where: { email: DEMO_SUPER_ADMIN_EMAIL },
-  });
-
-  if (existing_user) {
-    return prisma.user.update({
-      where: { id: existing_user.id },
-      data: {
-        deleted_at: null,
-        is_active: true,
-        name: DEMO_SUPER_ADMIN_NAME,
-        org_id: existing_user.org_id ?? organization.id,
-        password_hash: options.reset_password === false ? existing_user.password_hash : password_hash,
-        role: UserRole.SUPER_ADMIN,
-      },
-    });
-  }
-
-  return prisma.user.create({
-    data: {
-      email: DEMO_SUPER_ADMIN_EMAIL,
-      is_active: true,
-      name: DEMO_SUPER_ADMIN_NAME,
-      org_id: organization.id,
-      password_hash,
-      role: UserRole.SUPER_ADMIN,
-    },
-  });
-}
 
 export async function seed_demo_dataset(options: SeedOptions = {}) {
   if (options.purge_existing ?? true) {
