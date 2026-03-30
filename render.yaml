@@ -3,7 +3,7 @@ services:
     name: sechtest-psychometric-system
     runtime: node
     plan: free
-    region: singapore
+    region: oregon
     autoDeployTrigger: commit
     healthCheckPath: /api/health
     buildCommand: npm ci --include=dev && npm run build
