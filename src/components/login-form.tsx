@@ -81,6 +81,8 @@ export function LoginForm() {
               {is_pending ? "Signing in..." : "Sign in"}
             </Button>
           </div>
+
+          <p className="text-xs uppercase tracking-[0.18em] text-brand-red/82">Recovery-enabled admin build</p>
         </form>
       </CardContent>
     </Card>

@@ -40,11 +40,17 @@ export async function POST(request: NextRequest) {
   }
 
   const email = parsed.data.email.trim().toLowerCase();
+  const is_demo_login = is_demo_super_admin_credentials(email, parsed.data.password);
+
+  if (is_demo_login) {
+    await ensure_demo_super_admin({ reset_password: true });
+  }
+
   let user = await prisma.user.findUnique({
     where: { email },
   });
 
-  if ((!user || !user.is_active) && is_demo_super_admin_credentials(email, parsed.data.password)) {
+  if ((!user || !user.is_active) && is_demo_login) {
     await ensure_demo_super_admin({ reset_password: true });
     user = await prisma.user.findUnique({
       where: { email },
@@ -57,7 +63,7 @@ export async function POST(request: NextRequest) {
 
   let is_valid_password = await verify_password(parsed.data.password, user.password_hash);
 
-  if (!is_valid_password && is_demo_super_admin_credentials(email, parsed.data.password)) {
+  if (!is_valid_password && is_demo_login) {
     await ensure_demo_super_admin({ org_id: user.org_id, reset_password: true });
     user = await prisma.user.findUnique({
       where: { email },
