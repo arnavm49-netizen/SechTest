@@ -82,7 +82,7 @@ export function LoginForm() {
             </Button>
           </div>
 
-          <p className="text-xs uppercase tracking-[0.18em] text-brand-red/82">Recovery-enabled admin build</p>
+          <p className="text-xs uppercase tracking-[0.18em] text-brand-red/82">Recovery-enabled admin build v2</p>
         </form>
       </CardContent>
     </Card>
