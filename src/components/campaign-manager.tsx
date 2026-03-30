@@ -196,14 +196,14 @@ export function CampaignManager({
           </CardHeader>
           <CardContent className="space-y-4">
             <input
-              className="w-full rounded-[1.3rem] border border-brand-black/15 bg-brand-grey px-4 py-3 outline-none focus:border-brand-red"
+              className="w-full min-w-0 rounded-[1.2rem] border border-brand-black/15 bg-brand-grey px-4 py-3 text-sm outline-none focus:border-brand-red"
               onChange={(event) => set_form((current) => ({ ...current, name: event.target.value }))}
               placeholder="Campaign name"
               value={form.name}
             />
             <div className="grid gap-3 md:grid-cols-2">
               <select
-                className="rounded-[1.3rem] border border-brand-black/15 bg-brand-grey px-4 py-3 outline-none focus:border-brand-red"
+                className="w-full min-w-0 rounded-[1.2rem] border border-brand-black/15 bg-brand-grey px-4 py-3 text-sm outline-none focus:border-brand-red"
                 onChange={(event) => set_form((current) => ({ ...current, assessment_version_id: event.target.value }))}
                 value={form.assessment_version_id}
               >
@@ -214,7 +214,7 @@ export function CampaignManager({
                 ))}
               </select>
               <select
-                className="rounded-[1.3rem] border border-brand-black/15 bg-brand-grey px-4 py-3 outline-none focus:border-brand-red"
+                className="w-full min-w-0 rounded-[1.2rem] border border-brand-black/15 bg-brand-grey px-4 py-3 text-sm outline-none focus:border-brand-red"
                 onChange={(event) => set_form((current) => ({ ...current, role_family_id: event.target.value }))}
                 value={form.role_family_id}
               >
@@ -225,7 +225,7 @@ export function CampaignManager({
                 ))}
               </select>
               <select
-                className="rounded-[1.3rem] border border-brand-black/15 bg-brand-grey px-4 py-3 outline-none focus:border-brand-red"
+                className="w-full min-w-0 rounded-[1.2rem] border border-brand-black/15 bg-brand-grey px-4 py-3 text-sm outline-none focus:border-brand-red"
                 onChange={(event) => set_form((current) => ({ ...current, status: event.target.value as CampaignStatus }))}
                 value={form.status}
               >
@@ -236,7 +236,7 @@ export function CampaignManager({
                 ))}
               </select>
               <input
-                className="rounded-[1.3rem] border border-brand-black/15 bg-brand-grey px-4 py-3 outline-none focus:border-brand-red"
+                className="w-full min-w-0 rounded-[1.2rem] border border-brand-black/15 bg-brand-grey px-4 py-3 text-sm outline-none focus:border-brand-red"
                 onChange={(event) => set_form((current) => ({ ...current, deadline: event.target.value }))}
                 type="datetime-local"
                 value={form.deadline}
@@ -246,7 +246,7 @@ export function CampaignManager({
             <label className="block space-y-2">
               <span className="text-sm font-semibold">Invite template</span>
               <textarea
-                className="min-h-24 w-full rounded-[1.4rem] border border-brand-black/15 bg-brand-grey px-4 py-3 outline-none focus:border-brand-red"
+                className="min-h-24 w-full rounded-[1.3rem] border border-brand-black/15 bg-brand-grey px-4 py-3 text-sm leading-6 outline-none focus:border-brand-red"
                 onChange={(event) => set_form((current) => ({ ...current, invite_template: event.target.value }))}
                 value={form.invite_template}
               />
@@ -254,7 +254,7 @@ export function CampaignManager({
             <label className="block space-y-2">
               <span className="text-sm font-semibold">Reminder template</span>
               <textarea
-                className="min-h-24 w-full rounded-[1.4rem] border border-brand-black/15 bg-brand-grey px-4 py-3 outline-none focus:border-brand-red"
+                className="min-h-24 w-full rounded-[1.3rem] border border-brand-black/15 bg-brand-grey px-4 py-3 text-sm leading-6 outline-none focus:border-brand-red"
                 onChange={(event) => set_form((current) => ({ ...current, reminder_template: event.target.value }))}
                 value={form.reminder_template}
               />
@@ -270,7 +270,7 @@ export function CampaignManager({
                 <span className="text-sm font-semibold">Scheduled reminders enabled</span>
               </label>
               <input
-                className="rounded-[1.3rem] border border-brand-black/15 bg-brand-grey px-4 py-3 outline-none focus:border-brand-red"
+                className="w-full min-w-0 rounded-[1.2rem] border border-brand-black/15 bg-brand-grey px-4 py-3 text-sm outline-none focus:border-brand-red"
                 min={1}
                 onChange={(event) => set_form((current) => ({ ...current, reminder_day_interval: Number(event.target.value) }))}
                 type="number"
@@ -317,7 +317,7 @@ export function CampaignManager({
               ))}
             </div>
             <textarea
-              className="min-h-28 w-full rounded-[1.4rem] border border-brand-black/15 bg-brand-grey px-4 py-3 outline-none focus:border-brand-red"
+              className="min-h-28 w-full rounded-[1.3rem] border border-brand-black/15 bg-brand-grey px-4 py-3 text-sm leading-6 outline-none focus:border-brand-red"
               onChange={(event) => set_bulk_email_content(event.target.value)}
               placeholder="Paste candidate emails, separated by commas, spaces, or new lines"
               value={bulk_email_content}
@@ -402,14 +402,14 @@ export function CampaignManager({
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div>
                         <p className="font-semibold">{invite.candidate_name ?? invite.email}</p>
-                        <p className="text-sm text-brand-black/68">{invite.email}</p>
+                        <p className="max-w-[18rem] overflow-x-auto whitespace-nowrap text-sm text-brand-black/68">{invite.email}</p>
                       </div>
                       <Badge tone={invite.status === "COMPLETED" ? "success" : invite.status === "SENT" ? "red" : "neutral"}>{invite.status}</Badge>
                     </div>
-                    <p className="mt-2 text-sm text-brand-black/70">
-                      Invited: {invite.invited_at ? format_date(invite.invited_at) : "Not sent"} | Reminders: {invite.reminder_count} | Link token:{" "}
-                      {invite.invite_token}
-                    </p>
+                    <div className="mt-2 space-y-2 text-sm text-brand-black/70">
+                      <p>Invited: {invite.invited_at ? format_date(invite.invited_at) : "Not sent"} | Reminders: {invite.reminder_count}</p>
+                      <p className="overflow-x-auto whitespace-nowrap font-semibold text-brand-black/82">Token: {invite.invite_token}</p>
+                    </div>
                   </div>
                 ))
               ) : (

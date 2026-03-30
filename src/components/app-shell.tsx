@@ -14,14 +14,12 @@ export function AppShell({ children, user }: { children: React.ReactNode; user: 
   return (
     <div className="min-h-screen bg-brand-grey text-brand-black">
       <div className="mx-auto flex min-h-screen max-w-[1600px] flex-col lg:flex-row">
-        <aside className="w-full bg-brand-black px-5 py-6 text-brand-white lg:sticky lg:top-0 lg:h-screen lg:w-[320px] lg:px-6 lg:py-8">
+        <aside className="w-full bg-brand-black px-5 py-6 text-brand-white lg:sticky lg:top-0 lg:h-screen lg:w-[290px] lg:px-6 lg:py-8">
           <div className="space-y-4">
             <div>
               <p className="text-xs uppercase tracking-[0.32em] text-brand-white/60">Enterprise Psychometric System</p>
               <h1 className="mt-3 text-3xl font-semibold leading-tight">D&amp;H Secheron</h1>
-              <p className="mt-3 text-sm leading-6 text-brand-white/70">
-                Step 1 foundation shell for multi-tenant psychometric operations, governance, and access control.
-              </p>
+              <p className="mt-3 max-w-xs text-sm leading-6 text-brand-white/70">Assessment operations, administered links, reporting, and governance.</p>
             </div>
 
             <div className="rounded-[1.75rem] border border-brand-white/15 bg-brand-white/8 p-4">
@@ -48,7 +46,7 @@ export function AppShell({ children, user }: { children: React.ReactNode; user: 
                   key={item.href}
                 >
                   <p className="text-sm font-semibold">{item.label}</p>
-                  <p className={cn("mt-1 text-xs leading-5", is_active ? "text-brand-white/85" : "text-brand-white/55")}>
+                  <p className={cn("mt-1 max-w-[16rem] text-xs leading-5", is_active ? "text-brand-white/85" : "text-brand-white/55")}>
                     {item.description}
                   </p>
                 </Link>
@@ -57,19 +55,17 @@ export function AppShell({ children, user }: { children: React.ReactNode; user: 
           </nav>
         </aside>
 
-        <div className="flex-1 px-4 py-4 sm:px-6 lg:px-8 lg:py-8">
-          <header className="flex flex-col gap-4 rounded-[2rem] border border-brand-black/10 bg-brand-white px-6 py-5 shadow-soft sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0 flex-1 px-4 py-4 sm:px-6 lg:px-8 lg:py-8">
+          <header className="flex flex-col gap-4 rounded-[2rem] border border-brand-black/10 bg-brand-white px-5 py-5 shadow-soft sm:flex-row sm:items-center sm:justify-between sm:px-6">
             <div>
               <p className="text-xs uppercase tracking-[0.28em] text-brand-red">Operating shell</p>
-              <h2 className="mt-2 text-2xl font-semibold">Role-aware access and configuration workspace</h2>
-              <p className="mt-2 max-w-3xl text-sm leading-6 text-brand-black/70">
-                Authentication, RBAC, admin navigation, audit-ready workflows, and the seeded psychometric foundation live here.
-              </p>
+              <h2 className="mt-2 text-2xl font-semibold">Role-aware assessment workspace</h2>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-brand-black/70">Login, configuration, direct test administration, and recorded results stay connected here.</p>
             </div>
             <LogoutButton />
           </header>
 
-          <main className="py-6">{children}</main>
+          <main className="min-w-0 py-6">{children}</main>
         </div>
       </div>
     </div>

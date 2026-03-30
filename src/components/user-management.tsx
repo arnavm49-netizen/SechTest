@@ -188,7 +188,7 @@ export function UserManagement({
             </div>
             <div className="w-full max-w-sm">
               <input
-                className="w-full rounded-full border border-brand-black/15 bg-brand-grey px-4 py-3 outline-none transition focus:border-brand-red"
+                className="w-full min-w-0 rounded-full border border-brand-black/15 bg-brand-grey px-4 py-3 text-sm outline-none transition focus:border-brand-red"
                 onChange={(event) => set_search(event.target.value)}
                 placeholder="Search by name, email, or role"
                 type="search"
@@ -197,7 +197,7 @@ export function UserManagement({
             </div>
           </CardHeader>
           <CardContent className="overflow-x-auto">
-            <table className="min-w-full border-separate border-spacing-y-3 text-left">
+            <table className="min-w-[880px] border-separate border-spacing-y-3 text-left">
               <thead>
                 <tr className="text-xs uppercase tracking-[0.18em] text-brand-black/55">
                   <th className="px-3">Name</th>
@@ -212,8 +212,8 @@ export function UserManagement({
                 {filtered_users.map((user) => (
                   <tr className="rounded-[1.4rem] bg-brand-grey" key={user.id}>
                     <td className="rounded-l-[1.4rem] px-3 py-4 align-top">
-                      <p className="font-semibold">{user.name}</p>
-                      <p className="mt-1 text-sm text-brand-black/65">{user.email}</p>
+                      <p className="whitespace-nowrap font-semibold">{user.name}</p>
+                      <p className="mt-1 max-w-[16rem] overflow-x-auto whitespace-nowrap text-sm text-brand-black/65">{user.email}</p>
                     </td>
                     <td className="px-3 py-4 align-top">
                       <Badge tone={user.role === "SUPER_ADMIN" ? "red" : "neutral"}>{format_role_label(user.role)}</Badge>
@@ -255,7 +255,7 @@ export function UserManagement({
           <CardContent className="space-y-4">
             <input accept=".csv,text/csv" className="block w-full text-sm" onChange={load_file} type="file" />
             <textarea
-              className="min-h-48 w-full rounded-[1.5rem] border border-brand-black/15 bg-brand-grey px-4 py-4 outline-none transition focus:border-brand-red"
+              className="min-h-48 w-full rounded-[1.5rem] border border-brand-black/15 bg-brand-grey px-4 py-4 text-sm leading-6 outline-none transition focus:border-brand-red"
               onChange={(event) => set_csv_text(event.target.value)}
               placeholder={"name,email,role,password,is_active\nAsha Singh,asha.singh@example.com,MANAGER,Password@123,true"}
               value={csv_text}

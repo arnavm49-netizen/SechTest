@@ -39,9 +39,9 @@ export function LoginForm() {
     <Card className="w-full max-w-[520px] border-brand-black/12">
       <CardHeader>
         <p className="text-xs uppercase tracking-[0.28em] text-brand-red">Secure access</p>
-        <CardTitle className="text-3xl">Step 1 foundation login</CardTitle>
+        <CardTitle className="text-3xl">Platform admin login</CardTitle>
         <CardDescription>
-          Sign in with the seeded platform users to review the admin shell, role-based access controls, and user management.
+          Sign in with the seeded platform account to manage assessments, administer links, and review recorded results.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -50,8 +50,9 @@ export function LoginForm() {
             <span className="text-sm font-semibold text-brand-black">Email</span>
             <input
               autoComplete="email"
-              className="w-full rounded-[1.25rem] border border-brand-black/15 bg-brand-grey px-4 py-3 outline-none transition focus:border-brand-red"
+              className="w-full min-w-0 rounded-[1.15rem] border border-brand-black/15 bg-brand-grey px-4 py-3 text-sm outline-none transition focus:border-brand-red"
               onChange={(event) => set_email(event.target.value)}
+              placeholder="superadmin@secheron.example.com"
               type="email"
               value={email}
             />
@@ -61,8 +62,9 @@ export function LoginForm() {
             <span className="text-sm font-semibold text-brand-black">Password</span>
             <input
               autoComplete="current-password"
-              className="w-full rounded-[1.25rem] border border-brand-black/15 bg-brand-grey px-4 py-3 outline-none transition focus:border-brand-red"
+              className="w-full min-w-0 rounded-[1.15rem] border border-brand-black/15 bg-brand-grey px-4 py-3 text-sm outline-none transition focus:border-brand-red"
               onChange={(event) => set_password(event.target.value)}
+              placeholder="Password@123"
               type="password"
               value={password}
             />
@@ -72,7 +74,7 @@ export function LoginForm() {
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm leading-6 text-brand-black/70">
-              Demo default: <span className="font-semibold text-brand-black">superadmin@secheron.example.com</span> /
+              Default admin: <span className="font-semibold text-brand-black">superadmin@secheron.example.com</span> /
               <span className="font-semibold text-brand-black"> Password@123</span>
             </p>
             <Button disabled={is_pending} type="submit">

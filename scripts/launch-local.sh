@@ -59,25 +59,6 @@ const prisma = new PrismaClient();
 NODE
 }
 
-database_is_empty() {
-  node <<'NODE'
-const { PrismaClient } = require("@prisma/client");
-const prisma = new PrismaClient();
-
-(async () => {
-  try {
-    const count = await prisma.organization.count();
-    console.log(count === 0 ? "yes" : "no");
-  } finally {
-    await prisma.$disconnect();
-  }
-})().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
-NODE
-}
-
 wait_for_database() {
   local attempts=30
 
@@ -153,12 +134,7 @@ if ! database_reachable; then
 fi
 
 log "Applying database migrations."
-npm run db:deploy
-
-if [ "$(database_is_empty)" = "yes" ]; then
-  log "Seeding initial demo data."
-  npm run db:seed
-fi
+npm run db:bootstrap
 
 log "Launching the app at $APP_URL."
 open_browser_when_ready

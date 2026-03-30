@@ -11,6 +11,7 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
+    "db:bootstrap": "npm run db:deploy && tsx prisma/bootstrap.ts",
     "db:seed": "tsx prisma/seed.ts",
     "test": "vitest run --coverage",
     "postinstall": "prisma generate"

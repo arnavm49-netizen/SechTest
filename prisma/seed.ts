@@ -1,4 +1,5 @@
 import { AssessmentLayerCode, AssessmentVersionStatus, CampaignStatus, MeasurementFrequency, Prisma, ReportType, UserRole } from "@prisma/client";
+import { pathToFileURL } from "url";
 import { hash_password } from "../src/lib/auth/password";
 import { complete_assessment_from_invite, record_assessment_consent, save_assessment_response, start_assessment_from_invite } from "../src/lib/assessment-runtime";
 import type { AssessmentPublicItem } from "../src/lib/assessment-session";
@@ -7,10 +8,69 @@ import { default_scoring_model_config } from "../src/lib/scoring/config";
 import { run_scoring_for_assessment } from "../src/lib/scoring-service";
 import { build_step_two_question_bank } from "../src/lib/seed/question-bank";
 
-async function main() {
-  await purge_existing_data();
+type SeedOptions = {
+  purge_existing?: boolean;
+};
 
-  const default_password_hash = await hash_password("Password@123");
+export const DEMO_SUPER_ADMIN_EMAIL = "superadmin@secheron.example.com";
+export const DEMO_SUPER_ADMIN_NAME = "Aarav Kulkarni";
+export const DEMO_PASSWORD = "Password@123";
+
+export async function ensure_demo_super_admin(options: {
+  org_id?: string;
+  reset_password?: boolean;
+} = {}) {
+  const organization =
+    options.org_id
+      ? await prisma.organization.findUnique({
+          where: { id: options.org_id },
+        })
+      : await prisma.organization.findFirst({
+          where: { deleted_at: null },
+          orderBy: [{ created_at: "asc" }],
+        });
+
+  if (!organization) {
+    return null;
+  }
+
+  const password_hash = await hash_password(DEMO_PASSWORD);
+  const existing_user = await prisma.user.findUnique({
+    where: { email: DEMO_SUPER_ADMIN_EMAIL },
+  });
+
+  if (existing_user) {
+    return prisma.user.update({
+      where: { id: existing_user.id },
+      data: {
+        deleted_at: null,
+        is_active: true,
+        name: DEMO_SUPER_ADMIN_NAME,
+        org_id: existing_user.org_id ?? organization.id,
+        password_hash: options.reset_password === false ? existing_user.password_hash : password_hash,
+        role: UserRole.SUPER_ADMIN,
+      },
+    });
+  }
+
+  return prisma.user.create({
+    data: {
+      email: DEMO_SUPER_ADMIN_EMAIL,
+      is_active: true,
+      name: DEMO_SUPER_ADMIN_NAME,
+      org_id: organization.id,
+      password_hash,
+      role: UserRole.SUPER_ADMIN,
+    },
+  });
+}
+
+export async function seed_demo_dataset(options: SeedOptions = {}) {
+  if (options.purge_existing ?? true) {
+    await purge_existing_data();
+  }
+
+  const default_password_hash = await hash_password(DEMO_PASSWORD);
 
   const organization = await prisma.organization.create({
     data: {
@@ -43,7 +103,7 @@ async function main() {
   });
 
   const seed_users = [
-    { email: "superadmin@secheron.example.com", name: "Aarav Kulkarni", role: UserRole.SUPER_ADMIN },
+    { email: DEMO_SUPER_ADMIN_EMAIL, name: DEMO_SUPER_ADMIN_NAME, role: UserRole.SUPER_ADMIN },
     { email: "hradmin1@secheron.example.com", name: "Riya Sharma", role: UserRole.HR_ADMIN },
     { email: "hradmin2@secheron.example.com", name: "Neha Iyer", role: UserRole.HR_ADMIN },
     { email: "manager1@secheron.example.com", name: "Vikram Sethi", role: UserRole.MANAGER },
@@ -76,7 +136,7 @@ async function main() {
     where: { org_id: organization.id },
   });
   const user_lookup = new Map(users.map((user) => [user.email, user]));
-  const super_admin = user_lookup.get("superadmin@secheron.example.com");
+  const super_admin = user_lookup.get(DEMO_SUPER_ADMIN_EMAIL);
   const manager_one = user_lookup.get("manager1@secheron.example.com");
   const manager_two = user_lookup.get("manager2@secheron.example.com");
   const manager_three = user_lookup.get("manager3@secheron.example.com");
@@ -1115,6 +1175,10 @@ async function main() {
   console.log("Seed completed successfully.");
 }
 
+async function main() {
+  await seed_demo_dataset({ purge_existing: true });
+}
+
 async function purge_existing_data() {
   await prisma.systemHealthCheck.deleteMany();
   await prisma.governanceRequest.deleteMany();
@@ -1208,11 +1272,15 @@ function assessment_index_offset(relationship: string) {
   }
 }
 
-main()
-  .catch((error) => {
-    console.error(error);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+const entrypoint = process.argv[1] ? pathToFileURL(process.argv[1]).href : "";
+
+if (import.meta.url === entrypoint) {
+  main()
+    .catch((error) => {
+      console.error(error);
+      process.exit(1);
+    })
+    .finally(async () => {
+      await prisma.$disconnect();
+    });
+}
