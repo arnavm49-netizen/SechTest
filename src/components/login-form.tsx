@@ -5,16 +5,31 @@ import { useTransition, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
+type LoginMode = "participant" | "admin";
+
 export function LoginForm() {
   const router = useRouter();
-  const [email, set_email] = useState("superadmin@secheron.example.com");
-  const [password, set_password] = useState("Password@123");
+  const [mode, set_mode] = useState<LoginMode>("participant");
+  const [email, set_email] = useState("");
+  const [password, set_password] = useState("");
   const [error, set_error] = useState("");
   const [is_pending, start_transition] = useTransition();
+
+  function switch_mode(next_mode: LoginMode) {
+    set_mode(next_mode);
+    set_email("");
+    set_password("");
+    set_error("");
+  }
 
   function handle_submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     set_error("");
+
+    if (!email.trim() || !password.trim()) {
+      set_error("Please enter your email and password.");
+      return;
+    }
 
     start_transition(async () => {
       const response = await fetch("/api/auth/login", {
@@ -26,7 +41,7 @@ export function LoginForm() {
       const payload = (await response.json()) as { message?: string };
 
       if (!response.ok) {
-        set_error(payload.message ?? "Unable to sign in.");
+        set_error(payload.message ?? "Unable to sign in. Please check your credentials.");
         return;
       }
 
@@ -38,10 +53,37 @@ export function LoginForm() {
   return (
     <Card className="w-full max-w-[520px] border-brand-black/12">
       <CardHeader>
-        <p className="text-xs uppercase tracking-[0.28em] text-brand-red">Secure access</p>
-        <CardTitle className="text-3xl">Platform admin login</CardTitle>
+        <div className="flex gap-2">
+          <button
+            className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
+              mode === "participant"
+                ? "border-brand-red bg-brand-red text-brand-white"
+                : "border-brand-black/15 bg-brand-grey text-brand-black hover:border-brand-red/50"
+            }`}
+            onClick={() => switch_mode("participant")}
+            type="button"
+          >
+            Participant
+          </button>
+          <button
+            className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
+              mode === "admin"
+                ? "border-brand-red bg-brand-red text-brand-white"
+                : "border-brand-black/15 bg-brand-grey text-brand-black hover:border-brand-red/50"
+            }`}
+            onClick={() => switch_mode("admin")}
+            type="button"
+          >
+            Administrator
+          </button>
+        </div>
+        <CardTitle className="mt-2 text-3xl">
+          {mode === "participant" ? "Participant login" : "Admin login"}
+        </CardTitle>
         <CardDescription>
-          Sign in with the seeded platform account to manage assessments, administer links, and review recorded results.
+          {mode === "participant"
+            ? "Sign in to view your assessment results and feedback reports."
+            : "Sign in to manage assessments, users, and platform settings."}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -52,7 +94,7 @@ export function LoginForm() {
               autoComplete="email"
               className="w-full min-w-0 rounded-[1.15rem] border border-brand-black/15 bg-brand-grey px-4 py-3 text-sm outline-none transition focus:border-brand-red"
               onChange={(event) => set_email(event.target.value)}
-              placeholder="superadmin@secheron.example.com"
+              placeholder={mode === "participant" ? "your.name@example.com" : "admin@secheron.example.com"}
               type="email"
               value={email}
             />
@@ -64,7 +106,7 @@ export function LoginForm() {
               autoComplete="current-password"
               className="w-full min-w-0 rounded-[1.15rem] border border-brand-black/15 bg-brand-grey px-4 py-3 text-sm outline-none transition focus:border-brand-red"
               onChange={(event) => set_password(event.target.value)}
-              placeholder="Password@123"
+              placeholder="Enter your password"
               type="password"
               value={password}
             />
@@ -72,17 +114,16 @@ export function LoginForm() {
 
           {error ? <p className="rounded-[1rem] bg-brand-red/10 px-4 py-3 text-sm text-brand-red">{error}</p> : null}
 
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm leading-6 text-brand-black/70">
-              Default admin: <span className="font-semibold text-brand-black">superadmin@secheron.example.com</span> /
-              <span className="font-semibold text-brand-black"> Password@123</span>
-            </p>
-            <Button disabled={is_pending} type="submit">
-              {is_pending ? "Signing in..." : "Sign in"}
-            </Button>
-          </div>
+          <Button className="w-full" disabled={is_pending} type="submit">
+            {is_pending ? "Signing in..." : "Sign in"}
+          </Button>
 
-          <p className="text-xs uppercase tracking-[0.18em] text-brand-red/82">Recovery-enabled admin build v2</p>
+          {mode === "participant" ? (
+            <p className="rounded-[1rem] bg-brand-grey px-4 py-3 text-sm leading-6 text-brand-black/65">
+              Your login credentials were provided when you were registered for the assessment. If you cannot remember them,
+              please contact your HR administrator.
+            </p>
+          ) : null}
         </form>
       </CardContent>
     </Card>

@@ -7,9 +7,21 @@ import { get_primary_navigation } from "@/lib/rbac";
 import { cn, format_role_label } from "@/lib/utils";
 import { LogoutButton } from "@/components/logout-button";
 
+const PARTICIPANT_ROLES = new Set(["CANDIDATE", "RATER"]);
+
+function get_role_badge(role: string) {
+  if (role === "SUPER_ADMIN" || role === "HR_ADMIN") return "Administrator";
+  if (role === "MANAGER") return "Manager";
+  if (role === "ASSESSOR") return "Assessor";
+  if (role === "CANDIDATE") return "Participant";
+  if (role === "RATER") return "Reviewer";
+  return format_role_label(role);
+}
+
 export function AppShell({ children, user }: { children: React.ReactNode; user: SessionUser }) {
   const pathname = usePathname();
   const navigation = get_primary_navigation(user.role);
+  const is_participant = PARTICIPANT_ROLES.has(user.role);
 
   return (
     <div className="min-h-screen bg-brand-grey text-brand-black">
@@ -17,16 +29,22 @@ export function AppShell({ children, user }: { children: React.ReactNode; user: 
         <aside className="w-full bg-brand-black px-5 py-6 text-brand-white lg:sticky lg:top-0 lg:h-screen lg:w-[290px] lg:px-6 lg:py-8">
           <div className="space-y-4">
             <div>
-              <p className="text-xs uppercase tracking-[0.32em] text-brand-white/60">Assessment Platform</p>
-              <h1 className="mt-3 text-3xl font-semibold leading-tight">D&amp;H Secheron</h1>
-              <p className="mt-3 max-w-xs text-sm leading-6 text-brand-white/70">Manage assessments, send test invitations, review results, and track team development.</p>
+              <p className="text-xs uppercase tracking-[0.32em] text-brand-white/60">D&amp;H Secheron</p>
+              <h1 className="mt-3 text-3xl font-semibold leading-tight">
+                {is_participant ? "My Assessments" : "Assessment Platform"}
+              </h1>
+              <p className="mt-3 max-w-xs text-sm leading-6 text-brand-white/70">
+                {is_participant
+                  ? "View your assessment results, download feedback reports, and manage your account."
+                  : "Manage assessments, send test invitations, review results, and track team development."}
+              </p>
             </div>
 
             <div className="rounded-[1.75rem] border border-brand-white/15 bg-brand-white/8 p-4">
-              <p className="text-xs uppercase tracking-[0.24em] text-brand-white/60">Signed in</p>
+              <p className="text-xs uppercase tracking-[0.24em] text-brand-white/60">Signed in as</p>
               <p className="mt-2 text-lg font-semibold">{user.name}</p>
               <p className="text-sm text-brand-white/72">{user.email}</p>
-              <p className="mt-3 text-sm text-brand-red">{format_role_label(user.role)}</p>
+              <p className="mt-3 text-sm text-brand-red">{get_role_badge(user.role)}</p>
             </div>
           </div>
 
@@ -58,9 +76,15 @@ export function AppShell({ children, user }: { children: React.ReactNode; user: 
         <div className="min-w-0 flex-1 px-4 py-4 sm:px-6 lg:px-8 lg:py-8">
           <header className="flex flex-col gap-4 rounded-[2rem] border border-brand-black/10 bg-brand-white px-5 py-5 shadow-soft sm:flex-row sm:items-center sm:justify-between sm:px-6">
             <div>
-              <p className="text-xs uppercase tracking-[0.28em] text-brand-red">Assessment workspace</p>
+              <p className="text-xs uppercase tracking-[0.28em] text-brand-red">
+                {is_participant ? "Participant portal" : "Admin workspace"}
+              </p>
               <h2 className="mt-2 text-2xl font-semibold">Welcome, {user.name.split(" ")[0]}</h2>
-              <p className="mt-2 max-w-3xl text-sm leading-6 text-brand-black/70">Manage assessments, send test links, and review results all in one place.</p>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-brand-black/70">
+                {is_participant
+                  ? "View your results and download your feedback report."
+                  : "Manage assessments, send test links, and review results."}
+              </p>
             </div>
             <LogoutButton />
           </header>
