@@ -8,6 +8,7 @@ import { DEMO_PASSWORD, DEMO_SUPER_ADMIN_EMAIL, DEMO_SUPER_ADMIN_NAME } from "..
 import { default_scoring_model_config } from "../src/lib/scoring/config";
 import { run_scoring_for_assessment } from "../src/lib/scoring-service";
 import { build_step_two_question_bank } from "../src/lib/seed/question-bank";
+import { build_expanded_question_bank } from "../src/lib/seed/question-bank-expanded";
 
 type SeedOptions = {
   purge_existing?: boolean;
@@ -501,6 +502,65 @@ export async function seed_demo_dataset(options: SeedOptions = {}) {
       data: {
         changed_by: super_admin.id,
         change_notes: "Seed version 1",
+        item_id: item.id,
+        options_snapshot: to_nullable_json_input(seed_item.item_options ?? []),
+        scoring_key_snapshot: to_nullable_json_input(seed_item.scoring_key),
+        stem_snapshot: seed_item.stem,
+        version_number: 1,
+      },
+    });
+  }
+
+  // ── Expanded question bank (fills every type to >= 100 items) ──
+  const expanded_bank = build_expanded_question_bank(super_admin.id);
+
+  for (const seed_item of expanded_bank) {
+    const layer = layer_lookup.get(seed_item.layer_code);
+    const sub_dimension = sub_dimension_lookup.get(seed_item.sub_dimension_name);
+
+    if (!layer || !sub_dimension) {
+      continue;
+    }
+
+    const item = await prisma.item.create({
+      data: {
+        correct_answer: to_nullable_json_input(seed_item.correct_answer),
+        created_by: seed_item.created_by,
+        desirability_rating: seed_item.desirability_rating ?? null,
+        difficulty_b: seed_item.difficulty_b ?? null,
+        discrimination_a: seed_item.discrimination_a ?? null,
+        guessing_c: seed_item.guessing_c ?? null,
+        item_type: seed_item.item_type,
+        layer_id: layer.id,
+        options: {
+          editor_options: seed_item.item_options ?? [],
+          tag_metadata: seed_item.tags ?? {},
+        },
+        review_status: seed_item.review_status,
+        scoring_key: to_nullable_json_input(seed_item.scoring_key),
+        stem: seed_item.stem,
+        sub_dimension_id: sub_dimension.id,
+        tags: seed_item.tags ?? {},
+        time_limit_seconds: seed_item.time_limit_seconds ?? null,
+      },
+    });
+
+    if (seed_item.item_options?.length) {
+      await prisma.itemOption.createMany({
+        data: seed_item.item_options.map((option) => ({
+          display_order: option.display_order,
+          is_correct: option.is_correct ?? false,
+          item_id: item.id,
+          option_text: option.option_text,
+          score_weight: option.score_weight ?? 0,
+        })),
+      });
+    }
+
+    await prisma.questionVersion.create({
+      data: {
+        changed_by: super_admin.id,
+        change_notes: "Expanded seed version 1",
         item_id: item.id,
         options_snapshot: to_nullable_json_input(seed_item.item_options ?? []),
         scoring_key_snapshot: to_nullable_json_input(seed_item.scoring_key),

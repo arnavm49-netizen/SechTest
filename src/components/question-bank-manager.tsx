@@ -723,11 +723,15 @@ function NumericField({ label, onChange, value }: { label: string; onChange: (va
 }
 
 const ITEM_TYPE_LABELS: Record<string, string> = {
+  FORCED_CHOICE_PAIR: "Choose between two",
   FORCED_CHOICE_TRIAD: "Choose most & least",
   LIKERT: "Rating scale",
   MCQ: "Multiple choice",
   Q_SORT: "Card sorting",
+  RANKING: "Rank in order",
   SCENARIO: "Situational scenario",
+  SIMULATION: "Interactive simulation",
+  SINGLE_CHOICE_TIMED: "Timed quick answer",
 };
 
 function format_item_type(type: string) {
