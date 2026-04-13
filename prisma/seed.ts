@@ -301,6 +301,47 @@ export async function seed_demo_dataset(options: SeedOptions = {}) {
       name: "Commercial / KAM",
       weight_matrix: { COGNITIVE: 20, PERSONALITY: 20, MOTIVATORS: 10, EXECUTION: 20, LEADERSHIP: 10, SJT: 20 },
     },
+    // ── New role families ──
+    {
+      description: "Finance and accounting leadership role requiring analytical rigour, process discipline, and stakeholder reporting.",
+      name: "Finance Manager",
+      weight_matrix: { COGNITIVE: 22, PERSONALITY: 12, MOTIVATORS: 10, EXECUTION: 26, LEADERSHIP: 10, SJT: 20 },
+    },
+    {
+      description: "People and culture leadership role focused on employee experience, policy, and organisational development.",
+      name: "HR Business Partner",
+      weight_matrix: { COGNITIVE: 15, PERSONALITY: 20, MOTIVATORS: 15, EXECUTION: 12, LEADERSHIP: 22, SJT: 16 },
+    },
+    {
+      description: "Quality assurance role requiring attention to detail, process compliance, and continuous improvement mindset.",
+      name: "Quality Assurance Lead",
+      weight_matrix: { COGNITIVE: 20, PERSONALITY: 12, MOTIVATORS: 10, EXECUTION: 28, LEADERSHIP: 10, SJT: 20 },
+    },
+    {
+      description: "Supply chain and procurement role balancing vendor management, cost optimisation, and delivery reliability.",
+      name: "Supply Chain Manager",
+      weight_matrix: { COGNITIVE: 18, PERSONALITY: 14, MOTIVATORS: 12, EXECUTION: 24, LEADERSHIP: 12, SJT: 20 },
+    },
+    {
+      description: "Information technology leadership role combining technical problem-solving with project delivery and stakeholder management.",
+      name: "IT / Digital Lead",
+      weight_matrix: { COGNITIVE: 24, PERSONALITY: 12, MOTIVATORS: 14, EXECUTION: 20, LEADERSHIP: 12, SJT: 18 },
+    },
+    {
+      description: "Customer service and support role requiring empathy, communication, and rapid problem resolution.",
+      name: "Customer Service Lead",
+      weight_matrix: { COGNITIVE: 14, PERSONALITY: 22, MOTIVATORS: 14, EXECUTION: 16, LEADERSHIP: 16, SJT: 18 },
+    },
+    {
+      description: "Health, safety, and environment role requiring compliance orientation, risk awareness, and influence across operations.",
+      name: "HSE Officer",
+      weight_matrix: { COGNITIVE: 16, PERSONALITY: 14, MOTIVATORS: 10, EXECUTION: 24, LEADERSHIP: 14, SJT: 22 },
+    },
+    {
+      description: "Graduate and early-career talent entry point emphasising learning agility, cognitive potential, and motivational fit.",
+      name: "Graduate Trainee",
+      weight_matrix: { COGNITIVE: 28, PERSONALITY: 16, MOTIVATORS: 18, EXECUTION: 14, LEADERSHIP: 8, SJT: 16 },
+    },
   ];
 
   await prisma.roleFamily.createMany({
@@ -797,6 +838,438 @@ export async function seed_demo_dataset(options: SeedOptions = {}) {
         version_label: "v2-foundation-draft",
       },
     });
+
+    // ── Additional assessment versions — diverse test configurations ──
+
+    // Cognitive-Only Screener (quick 20-minute cognitive screen)
+    const cognitive_screener = await prisma.assessmentVersion.create({
+      data: {
+        org_id: organization.id,
+        published_at: new Date(),
+        published_by: super_admin.id,
+        sections_snapshot: [
+          {
+            enabled: true,
+            item_count: 15,
+            item_type_filters: ["MCQ"],
+            layer_code: "COGNITIVE",
+            order: 1,
+            pagination_style: "single",
+            time_limit_seconds: 600,
+          },
+          {
+            enabled: true,
+            item_count: 10,
+            item_type_filters: ["SINGLE_CHOICE_TIMED"],
+            layer_code: "COGNITIVE",
+            order: 2,
+            pagination_style: "single",
+            time_limit_seconds: 300,
+          },
+        ],
+        scoring_config_snapshot: {
+          anti_gaming_thresholds: { max_flags_before_invalidation: 3, max_straight_line_count: 5, speed_anomaly_seconds: 2 },
+          dropout_threshold_pct: 20,
+          fallback_mode: "classical",
+          pause_resume_rules: { allow_pause: false, allow_resume: false },
+          per_item_timers_enabled: true,
+          personality_hiring_allowed: false,
+          proctor_mode_default: false,
+          publish_notes: "Quick cognitive screener for high-volume hiring.",
+          question_randomisation: true,
+          section_randomisation: false,
+          total_battery_time_cap_seconds: 1200,
+        },
+        status: AssessmentVersionStatus.PUBLISHED,
+        version_label: "v3-cognitive-screener",
+      },
+    });
+
+    // Personality & Values Deep Dive (no cognitive, heavy on personality and motivators)
+    const personality_deep_dive = await prisma.assessmentVersion.create({
+      data: {
+        org_id: organization.id,
+        published_at: new Date(),
+        published_by: super_admin.id,
+        sections_snapshot: [
+          {
+            enabled: true,
+            item_count: 20,
+            item_type_filters: ["FORCED_CHOICE_TRIAD"],
+            layer_code: "PERSONALITY",
+            order: 1,
+            pagination_style: "single",
+            time_limit_seconds: 1200,
+          },
+          {
+            enabled: true,
+            item_count: 15,
+            item_type_filters: ["FORCED_CHOICE_PAIR"],
+            layer_code: "PERSONALITY",
+            order: 2,
+            pagination_style: "single",
+            time_limit_seconds: 600,
+          },
+          {
+            break_after: true,
+            enabled: true,
+            item_count: 20,
+            item_type_filters: ["Q_SORT"],
+            layer_code: "MOTIVATORS",
+            order: 3,
+            pagination_style: "section",
+            q_sort_distribution: { "Most Important": 5, "Important": 5, "Somewhat Important": 5, "Least Important": 5 },
+            time_limit_seconds: 900,
+          },
+          {
+            enabled: true,
+            item_count: 15,
+            item_type_filters: ["LIKERT"],
+            layer_code: "EXECUTION",
+            order: 4,
+            pagination_style: "single",
+            time_limit_seconds: 600,
+          },
+        ],
+        scoring_config_snapshot: {
+          anti_gaming_thresholds: { max_flags_before_invalidation: 4, max_straight_line_count: 6, speed_anomaly_seconds: 3 },
+          break_point_after_layer: "MOTIVATORS",
+          dropout_threshold_pct: 10,
+          fallback_mode: "classical",
+          pause_resume_rules: { allow_pause: true, allow_resume: true },
+          per_item_timers_enabled: false,
+          personality_hiring_allowed: false,
+          proctor_mode_default: false,
+          publish_notes: "Deep personality and values profile for development and coaching.",
+          question_randomisation: true,
+          section_randomisation: false,
+          total_battery_time_cap_seconds: 3600,
+        },
+        status: AssessmentVersionStatus.PUBLISHED,
+        version_label: "v4-personality-deep-dive",
+      },
+    });
+
+    // Leadership 360 Assessment (leadership scenarios + rater Likert)
+    const leadership_360 = await prisma.assessmentVersion.create({
+      data: {
+        org_id: organization.id,
+        published_at: new Date(),
+        published_by: super_admin.id,
+        sections_snapshot: [
+          {
+            enabled: true,
+            item_count: 15,
+            item_type_filters: ["SCENARIO"],
+            layer_code: "LEADERSHIP",
+            order: 1,
+            pagination_style: "single",
+            tag_filters: { audience: "SELF" },
+            time_limit_seconds: 1200,
+          },
+          {
+            enabled: true,
+            item_count: 15,
+            item_type_filters: ["LIKERT"],
+            layer_code: "LEADERSHIP",
+            order: 2,
+            pagination_style: "single",
+            tag_filters: { audience: "RATER" },
+            time_limit_seconds: 900,
+          },
+          {
+            enabled: true,
+            item_count: 10,
+            item_type_filters: ["RANKING"],
+            layer_code: "LEADERSHIP",
+            order: 3,
+            pagination_style: "single",
+            time_limit_seconds: 600,
+          },
+        ],
+        scoring_config_snapshot: {
+          anti_gaming_thresholds: { max_flags_before_invalidation: 3, max_straight_line_count: 5, speed_anomaly_seconds: 3 },
+          dropout_threshold_pct: 15,
+          fallback_mode: "classical",
+          pause_resume_rules: { allow_pause: true, allow_resume: true },
+          per_item_timers_enabled: true,
+          personality_hiring_allowed: false,
+          proctor_mode_default: false,
+          publish_notes: "Leadership capability assessment with self and rater components.",
+          question_randomisation: true,
+          section_randomisation: false,
+          total_battery_time_cap_seconds: 3000,
+        },
+        status: AssessmentVersionStatus.PUBLISHED,
+        version_label: "v5-leadership-360",
+      },
+    });
+
+    // Situational Judgment Focus (SJT + simulations)
+    const sjt_focus = await prisma.assessmentVersion.create({
+      data: {
+        org_id: organization.id,
+        published_at: new Date(),
+        published_by: super_admin.id,
+        sections_snapshot: [
+          {
+            enabled: true,
+            item_count: 15,
+            item_type_filters: ["SCENARIO"],
+            layer_code: "SJT",
+            order: 1,
+            pagination_style: "single",
+            time_limit_seconds: 1500,
+          },
+          {
+            enabled: true,
+            item_count: 10,
+            item_type_filters: ["SIMULATION"],
+            layer_code: "SJT",
+            order: 2,
+            pagination_style: "single",
+            time_limit_seconds: 1200,
+          },
+          {
+            enabled: true,
+            item_count: 10,
+            item_type_filters: ["SCENARIO"],
+            layer_code: "EXECUTION",
+            order: 3,
+            pagination_style: "single",
+            time_limit_seconds: 900,
+          },
+        ],
+        scoring_config_snapshot: {
+          anti_gaming_thresholds: { max_flags_before_invalidation: 3, max_straight_line_count: 5, speed_anomaly_seconds: 4 },
+          dropout_threshold_pct: 15,
+          fallback_mode: "classical",
+          pause_resume_rules: { allow_pause: true, allow_resume: true },
+          per_item_timers_enabled: true,
+          personality_hiring_allowed: false,
+          proctor_mode_default: false,
+          publish_notes: "Judgment and decision-making assessment for senior roles.",
+          question_randomisation: true,
+          section_randomisation: false,
+          total_battery_time_cap_seconds: 3600,
+        },
+        status: AssessmentVersionStatus.PUBLISHED,
+        version_label: "v6-sjt-simulation",
+      },
+    });
+
+    // Graduate Screening Battery (all layers, lighter touch)
+    const graduate_battery = await prisma.assessmentVersion.create({
+      data: {
+        org_id: organization.id,
+        published_at: new Date(),
+        published_by: super_admin.id,
+        sections_snapshot: [
+          {
+            enabled: true,
+            item_count: 10,
+            item_type_filters: ["MCQ", "SINGLE_CHOICE_TIMED"],
+            layer_code: "COGNITIVE",
+            order: 1,
+            pagination_style: "single",
+            time_limit_seconds: 600,
+          },
+          {
+            enabled: true,
+            item_count: 10,
+            item_type_filters: ["FORCED_CHOICE_PAIR"],
+            layer_code: "PERSONALITY",
+            order: 2,
+            pagination_style: "single",
+            time_limit_seconds: 400,
+          },
+          {
+            break_after: true,
+            enabled: true,
+            item_count: 10,
+            item_type_filters: ["Q_SORT"],
+            layer_code: "MOTIVATORS",
+            order: 3,
+            pagination_style: "section",
+            q_sort_distribution: { "Most Important": 3, "Important": 3, "Somewhat Important": 2, "Least Important": 2 },
+            time_limit_seconds: 480,
+          },
+          {
+            enabled: true,
+            item_count: 8,
+            item_type_filters: ["LIKERT"],
+            layer_code: "EXECUTION",
+            order: 4,
+            pagination_style: "single",
+            time_limit_seconds: 360,
+          },
+          {
+            enabled: true,
+            item_count: 5,
+            item_type_filters: ["SCENARIO"],
+            layer_code: "SJT",
+            order: 5,
+            pagination_style: "single",
+            time_limit_seconds: 500,
+          },
+        ],
+        scoring_config_snapshot: {
+          anti_gaming_thresholds: { max_flags_before_invalidation: 3, max_straight_line_count: 5, speed_anomaly_seconds: 3 },
+          break_point_after_layer: "MOTIVATORS",
+          dropout_threshold_pct: 20,
+          fallback_mode: "classical",
+          pause_resume_rules: { allow_pause: true, allow_resume: true },
+          per_item_timers_enabled: true,
+          personality_hiring_allowed: false,
+          proctor_mode_default: false,
+          publish_notes: "Lighter assessment battery for graduate and early-career hiring.",
+          question_randomisation: true,
+          section_randomisation: false,
+          total_battery_time_cap_seconds: 2400,
+        },
+        status: AssessmentVersionStatus.PUBLISHED,
+        version_label: "v7-graduate-screening",
+      },
+    });
+
+    // Execution & Ops Deep Dive
+    const execution_ops = await prisma.assessmentVersion.create({
+      data: {
+        org_id: organization.id,
+        published_at: new Date(),
+        published_by: super_admin.id,
+        sections_snapshot: [
+          {
+            enabled: true,
+            item_count: 15,
+            item_type_filters: ["LIKERT"],
+            layer_code: "EXECUTION",
+            order: 1,
+            pagination_style: "single",
+            time_limit_seconds: 600,
+          },
+          {
+            enabled: true,
+            item_count: 10,
+            item_type_filters: ["SCENARIO"],
+            layer_code: "EXECUTION",
+            order: 2,
+            pagination_style: "single",
+            time_limit_seconds: 900,
+          },
+          {
+            enabled: true,
+            item_count: 10,
+            item_type_filters: ["RANKING"],
+            layer_code: "EXECUTION",
+            order: 3,
+            pagination_style: "single",
+            time_limit_seconds: 600,
+          },
+          {
+            enabled: true,
+            item_count: 10,
+            item_type_filters: ["SIMULATION"],
+            layer_code: "EXECUTION",
+            order: 4,
+            pagination_style: "single",
+            time_limit_seconds: 1200,
+          },
+        ],
+        scoring_config_snapshot: {
+          anti_gaming_thresholds: { max_flags_before_invalidation: 3, max_straight_line_count: 5, speed_anomaly_seconds: 3 },
+          dropout_threshold_pct: 15,
+          fallback_mode: "classical",
+          pause_resume_rules: { allow_pause: true, allow_resume: true },
+          per_item_timers_enabled: true,
+          personality_hiring_allowed: false,
+          proctor_mode_default: false,
+          publish_notes: "Deep execution and operational competency assessment.",
+          question_randomisation: true,
+          section_randomisation: false,
+          total_battery_time_cap_seconds: 3600,
+        },
+        status: AssessmentVersionStatus.PUBLISHED,
+        version_label: "v8-execution-ops",
+      },
+    });
+
+    // ── Campaigns for each assessment version ──
+
+    const all_role_families = await prisma.roleFamily.findMany({
+      where: { org_id: organization.id },
+    });
+    const rf_lookup = new Map(all_role_families.map((rf) => [rf.name, rf]));
+
+    const campaign_defs = [
+      {
+        assessment_version_id: cognitive_screener.id,
+        name: "High-Volume Hiring Screen",
+        role_family: "Graduate Trainee",
+        invite_template: "You have been invited to complete a 20-minute cognitive screening assessment for D&H Secheron.",
+        reminder_template: "Reminder: your cognitive screening is still pending. It takes about 20 minutes.",
+      },
+      {
+        assessment_version_id: personality_deep_dive.id,
+        name: "Development Centre — Personality Profile",
+        role_family: "HR Business Partner",
+        invite_template: "You are invited to complete a personality and values deep dive as part of the development centre programme.",
+        reminder_template: "Reminder: your personality profile assessment is pending completion.",
+      },
+      {
+        assessment_version_id: leadership_360.id,
+        name: "Leadership Capability Review",
+        role_family: "Business Unit Leader",
+        invite_template: "You are invited to complete the leadership capability assessment as part of the annual leadership review.",
+        reminder_template: "Reminder: the leadership capability assessment is pending. Please complete it at your earliest convenience.",
+      },
+      {
+        assessment_version_id: sjt_focus.id,
+        name: "Senior Hire — Judgment Assessment",
+        role_family: "Plant Operations Manager",
+        invite_template: "As part of the senior hiring process, please complete this situational judgment assessment.",
+        reminder_template: "Reminder: your judgment assessment is still pending completion.",
+      },
+      {
+        assessment_version_id: graduate_battery.id,
+        name: "Campus Recruitment 2026",
+        role_family: "Graduate Trainee",
+        invite_template: "Congratulations on reaching the assessment stage! Please complete this 40-minute evaluation as the next step in the D&H Secheron campus recruitment process.",
+        reminder_template: "Reminder: your campus recruitment assessment is pending. It takes about 40 minutes.",
+      },
+      {
+        assessment_version_id: execution_ops.id,
+        name: "Operations Excellence — Execution Assessment",
+        role_family: "Quality Assurance Lead",
+        invite_template: "You are invited to complete the execution and operations competency assessment for the Operations Excellence programme.",
+        reminder_template: "Reminder: the operations competency assessment is pending.",
+      },
+    ];
+
+    for (const cd of campaign_defs) {
+      const target_rf = rf_lookup.get(cd.role_family) ?? primary_role_family;
+      if (!target_rf) continue;
+
+      await prisma.campaign.create({
+        data: {
+          assessment_version_id: cd.assessment_version_id,
+          created_by: super_admin.id,
+          invite_template: cd.invite_template,
+          name: cd.name,
+          org_id: organization.id,
+          reminder_template: cd.reminder_template,
+          role_family_id: target_rf.id,
+          settings: {
+            reminder_schedule: {
+              day_interval: 3,
+              enabled: true,
+              next_run_at: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
+            },
+          },
+          status: CampaignStatus.ACTIVE,
+        },
+      });
+    }
 
     await prisma.reportTemplate.createMany({
       data: [
