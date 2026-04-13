@@ -10,86 +10,86 @@ export type NavItem = {
 export const ADMIN_TABS: NavItem[] = [
   {
     href: "/admin/question-bank",
-    label: "Question Bank Manager",
-    description: "Author items, control versions, and manage review status.",
+    label: "Question Bank",
+    description: "Create and manage assessment questions, review status, and version history.",
     roles: ["SUPER_ADMIN", "HR_ADMIN"],
   },
   {
     href: "/admin/role-families",
-    label: "Role Family Manager",
-    description: "Maintain role families and publish weight models.",
+    label: "Role Families",
+    description: "Define job profiles and set how much each skill area matters per role.",
     roles: ["SUPER_ADMIN", "HR_ADMIN"],
   },
   {
     href: "/admin/scoring",
-    label: "Scoring Configuration",
-    description: "Tune scoring models, thresholds, and publish states.",
+    label: "Scoring Setup",
+    description: "Configure how assessments are scored and publish scoring models.",
     roles: ["SUPER_ADMIN", "HR_ADMIN"],
   },
   {
     href: "/admin/assessment-configuration",
-    label: "Assessment Configuration",
-    description: "Control versions, section order, consent, and runtime rules.",
+    label: "Assessment Builder",
+    description: "Set up test versions, section order, consent screens, and timing rules.",
     roles: ["SUPER_ADMIN", "HR_ADMIN"],
   },
   {
     href: "/admin/kpis",
-    label: "KPI Management",
-    description: "Map KPIs to roles and track linked outcomes.",
+    label: "KPI Tracking",
+    description: "Link performance indicators to roles and track real-world outcomes.",
     roles: ["SUPER_ADMIN", "HR_ADMIN"],
   },
   {
     href: "/admin/validity",
-    label: "Validity Dashboard",
-    description: "Review criterion, reliability, and adverse-impact evidence.",
+    label: "Assessment Quality",
+    description: "Check whether assessments are accurate, reliable, and fair across groups.",
     roles: ["SUPER_ADMIN", "HR_ADMIN"],
   },
   {
     href: "/admin/multi-rater",
-    label: "360 Configuration",
-    description: "Configure raters, calibration, and relationship rules.",
+    label: "360 Feedback Setup",
+    description: "Set up multi-rater feedback by assigning peers, managers, and direct reports.",
     roles: ["SUPER_ADMIN", "HR_ADMIN"],
   },
   {
     href: "/admin/development",
-    label: "Development Plan Configuration",
-    description: "Set development plans, defaults, and reassessment triggers.",
+    label: "Development Plans",
+    description: "Configure growth plans, skill gap defaults, and reassessment triggers.",
     roles: ["SUPER_ADMIN", "HR_ADMIN"],
   },
   {
     href: "/admin/users",
-    label: "User Management",
-    description: "Create users, assign roles, and manage activation.",
+    label: "Users",
+    description: "Add users, assign roles, and manage account access.",
     roles: ["SUPER_ADMIN", "HR_ADMIN"],
   },
   {
     href: "/admin/campaigns",
     label: "Campaigns",
-    description: "Manage campaigns, invites, and reminder cadence.",
+    description: "Create test campaigns, send invitations, and schedule reminders.",
     roles: ["SUPER_ADMIN", "HR_ADMIN"],
   },
   {
     href: "/admin/administered-tests",
-    label: "Administered Tests",
-    description: "Generate direct links and watch test completion inside the app.",
+    label: "Direct Test Links",
+    description: "Generate one-off candidate links and track completion status.",
     roles: ["SUPER_ADMIN", "HR_ADMIN"],
   },
   {
     href: "/admin/reports",
-    label: "Reports Configuration",
-    description: "Adjust report templates, branding, and delivery rules.",
+    label: "Reports",
+    description: "Customise report templates, branding, and distribution rules.",
     roles: ["SUPER_ADMIN", "HR_ADMIN"],
   },
   {
     href: "/admin/compliance",
-    label: "Compliance and Audit",
-    description: "Review consent, governance requests, and audit activity.",
+    label: "Privacy & Audit",
+    description: "Review consent records, data requests, and activity logs.",
     roles: ["SUPER_ADMIN", "HR_ADMIN"],
   },
   {
     href: "/admin/system-health",
     label: "System Health",
-    description: "Track health signals and operational readiness.",
+    description: "Monitor assessment quality signals and operational readiness.",
     roles: ["SUPER_ADMIN"],
   },
 ];
@@ -97,8 +97,8 @@ export const ADMIN_TABS: NavItem[] = [
 export const TEAM_TABS: NavItem[] = [
   {
     href: "/team",
-    label: "Team Workspace",
-    description: "Assessment status, role-fit views, heatmaps, and development tracking.",
+    label: "My Team",
+    description: "See how your direct reports performed, their strengths, and areas for growth.",
     roles: ["MANAGER", "SUPER_ADMIN", "HR_ADMIN"],
   },
 ];
@@ -106,8 +106,8 @@ export const TEAM_TABS: NavItem[] = [
 export const ASSESSOR_TABS: NavItem[] = [
   {
     href: "/assessor",
-    label: "Assessor Workspace",
-    description: "Campaign monitoring, invite operations, and export-ready progress views.",
+    label: "Test Delivery",
+    description: "Send assessment links, monitor campaign progress, and track completions.",
     roles: ["ASSESSOR", "SUPER_ADMIN", "HR_ADMIN"],
   },
 ];
@@ -158,8 +158,8 @@ export function get_primary_navigation(role: UserRole): NavItem[] {
   const base: NavItem[] = [
     {
       href: "/dashboard",
-      label: "Dashboard",
-      description: "Role-aware launchpad for the current user.",
+      label: "Home",
+      description: "Your personalised overview based on your role.",
       roles: ["SUPER_ADMIN", "HR_ADMIN", "MANAGER", "CANDIDATE", "RATER", "ASSESSOR"],
     },
   ];

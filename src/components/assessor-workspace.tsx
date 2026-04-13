@@ -53,17 +53,17 @@ export function AssessorWorkspace({
   return (
     <div className="space-y-6">
       <div className="space-y-3">
-        <Badge tone="red">Delivery workspace</Badge>
-        <h1 className="text-4xl font-semibold">Assessor operations</h1>
+        <Badge tone="red">Test delivery</Badge>
+        <h1 className="text-4xl font-semibold">Send & Track Assessments</h1>
         <p className="max-w-4xl text-base leading-8 text-brand-black/70">
-          Launch candidate tests, monitor campaign delivery, and keep the resulting records, scoring, and reports inside the same platform.
+          Send assessment links to candidates, monitor who has started or completed their tests, and track campaign progress.
         </p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
         <MetricCard label="Active campaigns" value={String(active_campaigns)} />
-        <MetricCard label="Live direct links" value={String(live_links)} />
-        <MetricCard label="Completed direct links" value={String(completed_links)} />
+        <MetricCard label="Links awaiting completion" value={String(live_links)} />
+        <MetricCard label="Completed tests" value={String(completed_links)} />
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">

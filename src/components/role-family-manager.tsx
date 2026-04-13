@@ -47,11 +47,11 @@ export function RoleFamilyManager({ initial_snapshot }: { initial_snapshot: Role
   return (
     <div className="space-y-6">
       <div className="space-y-3">
-        <Badge tone="red">Operational module</Badge>
-        <h1 className="text-4xl font-semibold">Role Family Manager</h1>
+        <Badge tone="red">Role families</Badge>
+        <h1 className="text-4xl font-semibold">Role Families</h1>
         <p className="max-w-4xl text-base leading-8 text-brand-black/70">
-          Maintain role families, keep the weighting model current, and see where each role family is already being used by assessments and
-          campaigns.
+          Define the job profiles your organisation uses. Set how much each assessment area (cognitive, personality, etc.) matters for each
+          role, and see which assessments and campaigns use each profile.
         </p>
         {message ? <p className="text-sm font-semibold text-brand-red">{message}</p> : null}
       </div>
@@ -60,14 +60,14 @@ export function RoleFamilyManager({ initial_snapshot }: { initial_snapshot: Role
         <MetricCard label="Role families" value={String(snapshot.summary.total_count)} />
         <MetricCard label="Active families" value={String(snapshot.summary.active_count)} />
         <MetricCard label="Live campaigns" value={String(snapshot.summary.active_live_campaigns)} />
-        <MetricCard label="Avg. weight total" value={String(snapshot.summary.average_weight_total)} />
+        <MetricCard label="Avg. total weight" value={String(snapshot.summary.average_weight_total)} />
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[0.88fr_1.12fr]">
         <Card>
           <CardHeader>
-            <CardTitle>Current role families</CardTitle>
-            <CardDescription>Select one to edit it, or start a new role family from scratch.</CardDescription>
+            <CardTitle>Your role families</CardTitle>
+            <CardDescription>Select a role family to edit it, or create a new one.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             <button
@@ -107,7 +107,7 @@ export function RoleFamilyManager({ initial_snapshot }: { initial_snapshot: Role
         <Card>
           <CardHeader>
             <CardTitle>{form.id ? "Edit role family" : "Create role family"}</CardTitle>
-            <CardDescription>Weight the role family across the active assessment layers used throughout the platform.</CardDescription>
+            <CardDescription>Set how important each assessment area is for this role. Higher numbers mean more weight in the final score.</CardDescription>
           </CardHeader>
           <CardContent>
             <form className="space-y-4" onSubmit={save_role_family}>
@@ -160,7 +160,7 @@ export function RoleFamilyManager({ initial_snapshot }: { initial_snapshot: Role
               </div>
 
               <div className="rounded-[1.4rem] border border-brand-black/10 bg-brand-grey px-4 py-4 text-sm text-brand-black/74">
-                Current total weight: <span className="font-semibold text-brand-black">{sum_weight_matrix(form.weight_matrix)}</span>
+                Total weight across all areas: <span className="font-semibold text-brand-black">{sum_weight_matrix(form.weight_matrix)}</span>
               </div>
 
               <div className="flex flex-wrap gap-3">

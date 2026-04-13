@@ -274,10 +274,10 @@ export function QuestionBankManager({
       <div className="space-y-6">
         <Card>
           <CardHeader>
-            <Badge tone="red">Implemented in Step 2</Badge>
-            <CardTitle className="mt-3">Question Bank Manager</CardTitle>
+            <Badge tone="red">Question bank</Badge>
+            <CardTitle className="mt-3">Assessment Questions</CardTitle>
             <CardDescription>
-              Search, filter, bulk manage, import, export, preview, and inspect item version history from one workspace.
+              Browse, create, and manage all assessment questions. Filter by type, category, or status, and import or export in bulk.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-5">
@@ -285,7 +285,7 @@ export function QuestionBankManager({
               <input
                 className="rounded-full border border-brand-black/15 bg-brand-grey px-4 py-3 outline-none focus:border-brand-red"
                 onChange={(event) => update_filter("search", event.target.value)}
-                placeholder="Search stem or construct"
+                placeholder="Search questions..."
                 type="search"
                 value={filters.search}
               />
@@ -294,7 +294,7 @@ export function QuestionBankManager({
                 onChange={(event) => update_filter("layer_code", event.target.value)}
                 value={filters.layer_code}
               >
-                <option value="">All layers</option>
+                <option value="">All assessment areas</option>
                 {layers.map((layer) => (
                   <option key={layer.code} value={layer.code}>
                     {layer.label}
@@ -306,7 +306,7 @@ export function QuestionBankManager({
                 onChange={(event) => update_filter("sub_dimension_id", event.target.value)}
                 value={filters.sub_dimension_id}
               >
-                <option value="">All sub-dimensions</option>
+                <option value="">All skill areas</option>
                 {current_sub_dimensions.map((entry) => (
                   <option key={entry.value} value={entry.value}>
                     {entry.label}
@@ -321,7 +321,7 @@ export function QuestionBankManager({
                 <option value="">All types</option>
                 {["MCQ", "FORCED_CHOICE_TRIAD", "Q_SORT", "SCENARIO", "LIKERT"].map((type) => (
                   <option key={type} value={type}>
-                    {type}
+                    {format_item_type(type)}
                   </option>
                 ))}
               </select>
@@ -330,7 +330,7 @@ export function QuestionBankManager({
                 onChange={(event) => update_filter("review_status", event.target.value)}
                 value={filters.review_status}
               >
-                <option value="">All review states</option>
+                <option value="">All statuses</option>
                 {["DRAFT", "REVIEWED", "APPROVED", "RETIRED"].map((status) => (
                   <option key={status} value={status}>
                     {status}
@@ -342,7 +342,7 @@ export function QuestionBankManager({
                 onChange={(event) => update_filter("role_family", event.target.value)}
                 value={filters.role_family}
               >
-                <option value="">All role-family usage</option>
+                <option value="">All role families</option>
                 {role_families.map((role_family) => (
                   <option key={role_family.value} value={role_family.label}>
                     {role_family.label}
@@ -377,10 +377,10 @@ export function QuestionBankManager({
                     <th className="px-3">Layer</th>
                     <th className="px-3">Sub-dimension</th>
                     <th className="px-3">Type</th>
-                    <th className="px-3">Stem</th>
-                    <th className="px-3">IRT</th>
+                    <th className="px-3">Question</th>
+                    <th className="px-3">Difficulty</th>
                     <th className="px-3">Status</th>
-                    <th className="px-3">Exposure</th>
+                    <th className="px-3">Usage</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -403,14 +403,14 @@ export function QuestionBankManager({
                       </td>
                       <td className="px-3 py-4 text-sm font-semibold">{item.layer_name}</td>
                       <td className="px-3 py-4 text-sm">{item.sub_dimension_name ?? "Mixed / metadata"}</td>
-                      <td className="px-3 py-4 text-sm">{item.item_type}</td>
+                      <td className="px-3 py-4 text-sm">{format_item_type(item.item_type)}</td>
                       <td className="max-w-sm px-3 py-4 text-sm text-brand-black/72">{item.stem.slice(0, 110)}...</td>
                       <td className="px-3 py-4 text-sm">
-                        b {item.difficulty_b ?? "NA"} / a {item.discrimination_a ?? "NA"}
+                        {item.difficulty_b ?? "N/A"} diff / {item.discrimination_a ?? "N/A"} disc
                       </td>
                       <td className="px-3 py-4 text-sm">{item.review_status}</td>
                       <td className="rounded-r-[1.4rem] px-3 py-4 text-sm">
-                        {item.exposure_count} uses / {item.exposure_pct}% share
+                        {item.exposure_count} times used ({item.exposure_pct}%)
                       </td>
                     </tr>
                   ))}
@@ -476,13 +476,13 @@ export function QuestionBankManager({
         <Card>
           <CardHeader>
             <CardTitle>{form.id ? "Edit item" : "Create item"}</CardTitle>
-            <CardDescription>Manage item content, IRT parameters, scoring, tags, and review workflow.</CardDescription>
+            <CardDescription>Set the question text, answer options, difficulty settings, and review status.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <textarea
               className="min-h-36 w-full rounded-[1.5rem] border border-brand-black/15 bg-brand-grey px-4 py-4 outline-none focus:border-brand-red"
               onChange={(event) => set_form((current) => ({ ...current, stem: event.target.value }))}
-              placeholder="Item stem"
+              placeholder="Type the question text here..."
               value={form.stem}
             />
 
@@ -492,7 +492,7 @@ export function QuestionBankManager({
                 onChange={(event) => set_form((current) => ({ ...current, layer_id: event.target.value, sub_dimension_id: "" }))}
                 value={form.layer_id}
               >
-                <option value="">Choose layer</option>
+                <option value="">Select assessment area</option>
                 {layers.map((layer) => (
                   <option key={layer.id} value={layer.id}>
                     {layer.label}
@@ -504,7 +504,7 @@ export function QuestionBankManager({
                 onChange={(event) => set_form((current) => ({ ...current, sub_dimension_id: event.target.value }))}
                 value={form.sub_dimension_id}
               >
-                <option value="">Choose sub-dimension</option>
+                <option value="">Select specific skill</option>
                 {sub_dimensions
                   .filter((entry) => !selected_layer_code || entry.layer_code === selected_layer_code)
                   .map((entry) => (
@@ -520,7 +520,7 @@ export function QuestionBankManager({
               >
                 {["MCQ", "FORCED_CHOICE_TRIAD", "Q_SORT", "SCENARIO", "LIKERT"].map((type) => (
                   <option key={type} value={type}>
-                    {type}
+                    {format_item_type(type)}
                   </option>
                 ))}
               </select>
@@ -538,15 +538,15 @@ export function QuestionBankManager({
             </div>
 
             <div className="grid gap-3 md:grid-cols-4">
-              <NumericField label="Difficulty b" value={form.difficulty_b} onChange={(value) => set_form((current) => ({ ...current, difficulty_b: value }))} />
+              <NumericField label="Difficulty level" value={form.difficulty_b} onChange={(value) => set_form((current) => ({ ...current, difficulty_b: value }))} />
               <NumericField
-                label="Discrimination a"
+                label="Discriminating power"
                 value={form.discrimination_a}
                 onChange={(value) => set_form((current) => ({ ...current, discrimination_a: value }))}
               />
-              <NumericField label="Guessing c" value={form.guessing_c} onChange={(value) => set_form((current) => ({ ...current, guessing_c: value }))} />
+              <NumericField label="Guessing probability" value={form.guessing_c} onChange={(value) => set_form((current) => ({ ...current, guessing_c: value }))} />
               <NumericField
-                label="Time limit (sec)"
+                label="Time limit (seconds)"
                 value={form.time_limit_seconds}
                 onChange={(value) => set_form((current) => ({ ...current, time_limit_seconds: value }))}
               />
@@ -614,7 +614,7 @@ export function QuestionBankManager({
             </div>
 
             <label className="block space-y-2">
-              <span className="text-sm font-semibold">Scoring key JSON</span>
+              <span className="text-sm font-semibold">Answer key (JSON)</span>
               <textarea
                 className="min-h-32 w-full rounded-[1.5rem] border border-brand-black/15 bg-brand-grey px-4 py-4 outline-none focus:border-brand-red"
                 onChange={(event) => set_form((current) => ({ ...current, scoring_key: event.target.value }))}
@@ -623,7 +623,7 @@ export function QuestionBankManager({
             </label>
 
             <label className="block space-y-2">
-              <span className="text-sm font-semibold">Tags JSON</span>
+              <span className="text-sm font-semibold">Tags (JSON)</span>
               <textarea
                 className="min-h-32 w-full rounded-[1.5rem] border border-brand-black/15 bg-brand-grey px-4 py-4 outline-none focus:border-brand-red"
                 onChange={(event) => set_form((current) => ({ ...current, tags: event.target.value }))}
@@ -633,8 +633,8 @@ export function QuestionBankManager({
 
             {selected_item ? (
               <div className="rounded-[1.5rem] bg-brand-grey p-4 text-sm leading-6 text-brand-black/75">
-                Exposure: {selected_item.exposure_count} uses ({selected_item.exposure_pct}% of assessments). Max exposure threshold:
-                {` ${selected_item.max_exposure_pct}`}. Items crossing the threshold auto-retire on update.
+                This question has been used {selected_item.exposure_count} times ({selected_item.exposure_pct}% of all assessments).
+                Maximum allowed usage is {selected_item.max_exposure_pct}%. Questions that exceed this limit are automatically retired.
               </div>
             ) : null}
 
@@ -720,6 +720,18 @@ function NumericField({ label, onChange, value }: { label: string; onChange: (va
       />
     </label>
   );
+}
+
+const ITEM_TYPE_LABELS: Record<string, string> = {
+  FORCED_CHOICE_TRIAD: "Choose most & least",
+  LIKERT: "Rating scale",
+  MCQ: "Multiple choice",
+  Q_SORT: "Card sorting",
+  SCENARIO: "Situational scenario",
+};
+
+function format_item_type(type: string) {
+  return ITEM_TYPE_LABELS[type] ?? type;
 }
 
 function parse_json_or_value(value: unknown) {

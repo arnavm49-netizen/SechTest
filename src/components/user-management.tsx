@@ -180,10 +180,10 @@ export function UserManagement({
         <Card>
           <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <Badge tone="red">Operational module</Badge>
-              <CardTitle className="mt-3">User directory and controls</CardTitle>
+              <Badge tone="red">Users</Badge>
+              <CardTitle className="mt-3">User Directory</CardTitle>
               <CardDescription>
-                Manage users, role assignment, activation state, and last-login visibility for the current organisation.
+                View all users, assign roles, activate or deactivate accounts, and see when each user last logged in.
               </CardDescription>
             </div>
             <div className="w-full max-w-sm">

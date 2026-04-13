@@ -22,10 +22,10 @@ export default async function DashboardPage() {
     <div className="space-y-6">
       <section className="space-y-4">
         <Badge tone="red">{format_role_label(user.role)}</Badge>
-        <h1 className="text-4xl font-semibold">Operational launchpad</h1>
+        <h1 className="text-4xl font-semibold">Dashboard</h1>
         <p className="max-w-4xl text-base leading-8 text-brand-black/70">
-          This dashboard is role-aware from day one. Super Admin and HR Admin land into configuration and governance, Managers land into
-          team oversight, Assessors land into campaign operations, and Candidates and Raters are intentionally kept outside the admin shell.
+          Your dashboard adapts to your role. Admins manage system settings and assessments, managers see team results, and assessors handle
+          test delivery.
         </p>
       </section>
 
@@ -50,55 +50,55 @@ export default async function DashboardPage() {
       <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
         <Card>
           <CardHeader>
-            <CardTitle>Accessible workspaces</CardTitle>
-            <CardDescription>These are the areas available to the current role right now.</CardDescription>
+            <CardTitle>Your workspaces</CardTitle>
+            <CardDescription>These are the areas you can access based on your role.</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
             {can_access_admin(user.role) ? (
-              <div className="rounded-[1.5rem] bg-brand-grey p-5">
-                <p className="font-semibold">Admin shell</p>
+              <a className="block rounded-[1.5rem] bg-brand-grey p-5 transition hover:bg-brand-white" href="/admin">
+                <p className="font-semibold">Admin Panel</p>
                 <p className="mt-2 text-sm leading-6 text-brand-black/70">
-                  {admin_tabs.length} admin modules are now reachable, with User Management fully implemented in this phase.
+                  Access {admin_tabs.length} modules including user management, question bank, campaigns, reports, and more.
                 </p>
-              </div>
+              </a>
             ) : null}
             {can_access_team(user.role) ? (
-              <div className="rounded-[1.5rem] bg-brand-grey p-5">
-                <p className="font-semibold">Team workspace</p>
+              <a className="block rounded-[1.5rem] bg-brand-grey p-5 transition hover:bg-brand-white" href="/team">
+                <p className="font-semibold">My Team</p>
                 <p className="mt-2 text-sm leading-6 text-brand-black/70">
-                  Managers receive a separate team-oriented surface instead of access to raw psychometric configuration.
+                  View your direct reports' assessment results, strengths, and development areas.
                 </p>
-              </div>
+              </a>
             ) : null}
             {can_access_assessor_workspace(user.role) ? (
-              <div className="rounded-[1.5rem] bg-brand-grey p-5">
-                <p className="font-semibold">Assessor workspace</p>
+              <a className="block rounded-[1.5rem] bg-brand-grey p-5 transition hover:bg-brand-white" href="/assessor">
+                <p className="font-semibold">Test Delivery</p>
                 <p className="mt-2 text-sm leading-6 text-brand-black/70">
-                  Assessors can work campaign and invite operations without receiving configuration-heavy admin access.
+                  Send assessment links to candidates, track campaign progress, and monitor completions.
                 </p>
-              </div>
+              </a>
             ) : null}
             {user.role === "CANDIDATE" || user.role === "RATER" ? (
-              <div className="rounded-[1.5rem] bg-brand-grey p-5">
-                <p className="font-semibold">Restricted shell</p>
+              <a className="block rounded-[1.5rem] bg-brand-grey p-5 transition hover:bg-brand-white" href="/candidate">
+                <p className="font-semibold">My Assessments</p>
                 <p className="mt-2 text-sm leading-6 text-brand-black/70">
-                  Candidate and rater access stays intentionally narrow. They are excluded from admin pages entirely.
+                  View your feedback reports and submit data access or privacy requests.
                 </p>
-              </div>
+              </a>
             ) : null}
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Illustrative weight warning</CardTitle>
-            <CardDescription>Surface this warning early so no seeded defaults are mistaken for validated hiring logic.</CardDescription>
+            <CardTitle>Important notice</CardTitle>
+            <CardDescription>Please read before using assessment results for any decisions.</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="rounded-[1.5rem] border border-brand-red/25 bg-brand-red/8 p-5 text-sm leading-7 text-brand-black/80">
-              These weights are illustrative defaults. Override them with job-analysis-derived weights before any hiring decisions. A plant
-              manager in welding consumables manufacturing has a fundamentally different cognitive-to-execution ratio than a cement key
-              account manager.
+              The current skill weights are placeholder defaults. Before using assessment results for hiring or promotion decisions, update
+              them with weights from a proper job analysis. Different roles require different skill mixes — for example, a plant manager
+              needs a very different profile compared to a key account manager.
             </div>
           </CardContent>
         </Card>

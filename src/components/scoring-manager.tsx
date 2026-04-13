@@ -285,10 +285,10 @@ export function ScoringManager({ initial_snapshot }: { initial_snapshot: Scoring
           <p className="text-sm text-brand-black/70">No scoring models exist yet.</p>
           <div className="mt-4 flex flex-wrap gap-3">
             <Button disabled={is_pending} onClick={() => create_draft("PHASE_A_CLASSICAL")} type="button">
-              Create classical draft
+              New standard scoring model
             </Button>
             <Button disabled={is_pending} onClick={() => create_draft("PHASE_B_HYBRID_IRT")} type="button" variant="outline">
-              Create hybrid IRT draft
+              New advanced scoring model
             </Button>
           </div>
         </CardContent>
@@ -301,17 +301,17 @@ export function ScoringManager({ initial_snapshot }: { initial_snapshot: Scoring
       <div className="grid gap-6 xl:grid-cols-[0.86fr_1.14fr]">
         <Card>
           <CardHeader>
-            <Badge tone="red">Implemented in Step 3</Badge>
-            <CardTitle className="mt-3">Scoring model versions</CardTitle>
-            <CardDescription>Draft, challenger, and live engine versions with explicit publish control and auditable run history.</CardDescription>
+            <Badge tone="red">Scoring</Badge>
+            <CardTitle className="mt-3">Scoring Models</CardTitle>
+            <CardDescription>Create, test, and publish different scoring approaches. Only the published model is used for live assessments.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex flex-wrap gap-3">
               <Button disabled={is_pending} onClick={() => create_draft("PHASE_A_CLASSICAL")} type="button">
-                New classical draft
+                New standard model
               </Button>
               <Button disabled={is_pending} onClick={() => create_draft("PHASE_B_HYBRID_IRT")} type="button" variant="outline">
-                New hybrid IRT draft
+                New advanced model
               </Button>
             </div>
             <div className="space-y-3">
@@ -360,9 +360,9 @@ export function ScoringManager({ initial_snapshot }: { initial_snapshot: Scoring
             <Badge tone={selected_model.status === "LIVE" ? "success" : selected_model.status === "DRAFT" ? "red" : "neutral"}>
               {selected_model.status}
             </Badge>
-            <CardTitle className="mt-3">Scoring governance</CardTitle>
+            <CardTitle className="mt-3">Model settings</CardTitle>
             <CardDescription>
-              Control accuracy and speed weighting, Phase B IRT/CAT parameters, fit thresholds, quality gates, and explanation settings.
+              Adjust scoring weights, difficulty parameters, fit thresholds, and quality checks for the selected model.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">

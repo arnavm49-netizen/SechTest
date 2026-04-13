@@ -26,11 +26,10 @@ export default async function AdminUsersPage() {
   return (
     <div className="space-y-6">
       <div className="space-y-3">
-        <Badge tone="red">Operational module</Badge>
+        <Badge tone="red">Users</Badge>
         <h1 className="text-4xl font-semibold">User Management</h1>
         <p className="max-w-4xl text-base leading-8 text-brand-black/70">
-          This workspace provides user CRUD, role assignment, activation and deactivation, and CSV bulk import with line-level error
-          reporting.
+          Add new users, assign their roles, activate or deactivate accounts, and import users in bulk using a CSV file.
         </p>
       </div>
 

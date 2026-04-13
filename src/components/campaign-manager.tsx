@@ -190,17 +190,20 @@ export function CampaignManager({
       <div className="space-y-6">
         <Card>
           <CardHeader>
-            <Badge tone="red">Implemented in Step 2</Badge>
-            <CardTitle className="mt-3">Campaign editor</CardTitle>
-            <CardDescription>Create campaigns, map them to role families and versions, and configure reminder cadence.</CardDescription>
+            <Badge tone="red">Campaigns</Badge>
+            <CardTitle className="mt-3">Create & Edit Campaign</CardTitle>
+            <CardDescription>Set up a test campaign, choose which role and assessment version to use, and configure automatic reminders.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <input
-              className="w-full min-w-0 rounded-[1.2rem] border border-brand-black/15 bg-brand-grey px-4 py-3 text-sm outline-none focus:border-brand-red"
-              onChange={(event) => set_form((current) => ({ ...current, name: event.target.value }))}
-              placeholder="Campaign name"
-              value={form.name}
-            />
+            <label className="block space-y-1.5">
+              <span className="text-xs font-semibold uppercase tracking-[0.12em] text-brand-black/60">Campaign name</span>
+              <input
+                className="w-full min-w-0 rounded-[1.2rem] border border-brand-black/15 bg-brand-grey px-4 py-3 text-sm outline-none focus:border-brand-red"
+                onChange={(event) => set_form((current) => ({ ...current, name: event.target.value }))}
+                placeholder="e.g. Q2 2026 Plant Manager Batch"
+                value={form.name}
+              />
+            </label>
             <div className="grid gap-3 md:grid-cols-2">
               <select
                 className="w-full min-w-0 rounded-[1.2rem] border border-brand-black/15 bg-brand-grey px-4 py-3 text-sm outline-none focus:border-brand-red"
@@ -244,7 +247,8 @@ export function CampaignManager({
             </div>
 
             <label className="block space-y-2">
-              <span className="text-sm font-semibold">Invite template</span>
+              <span className="text-sm font-semibold">Invitation message</span>
+              <p className="text-xs text-brand-black/50">This message will be included when candidates are invited to take the assessment.</p>
               <textarea
                 className="min-h-24 w-full rounded-[1.3rem] border border-brand-black/15 bg-brand-grey px-4 py-3 text-sm leading-6 outline-none focus:border-brand-red"
                 onChange={(event) => set_form((current) => ({ ...current, invite_template: event.target.value }))}
@@ -252,7 +256,8 @@ export function CampaignManager({
               />
             </label>
             <label className="block space-y-2">
-              <span className="text-sm font-semibold">Reminder template</span>
+              <span className="text-sm font-semibold">Reminder message</span>
+              <p className="text-xs text-brand-black/50">Sent to candidates who have not yet completed the assessment.</p>
               <textarea
                 className="min-h-24 w-full rounded-[1.3rem] border border-brand-black/15 bg-brand-grey px-4 py-3 text-sm leading-6 outline-none focus:border-brand-red"
                 onChange={(event) => set_form((current) => ({ ...current, reminder_template: event.target.value }))}
@@ -293,8 +298,8 @@ export function CampaignManager({
 
         <Card>
           <CardHeader>
-            <CardTitle>Invite candidates</CardTitle>
-            <CardDescription>Invite seeded candidate users individually or paste a CSV/list of email addresses.</CardDescription>
+            <CardTitle>Add candidates</CardTitle>
+            <CardDescription>Select existing users or paste email addresses to invite candidates to this campaign.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="max-h-64 space-y-2 overflow-auto rounded-[1.4rem] bg-brand-grey p-4">
@@ -339,8 +344,8 @@ export function CampaignManager({
       <div className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>Campaign monitor</CardTitle>
-            <CardDescription>Track invite progress, completion, and reminder cadence by campaign.</CardDescription>
+            <CardTitle>All campaigns</CardTitle>
+            <CardDescription>Track how many candidates have been invited, started, and completed each campaign.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {campaigns.map((campaign) => (
@@ -392,8 +397,8 @@ export function CampaignManager({
         {selected_campaign ? (
           <Card>
             <CardHeader>
-              <CardTitle>Invite status</CardTitle>
-              <CardDescription>Live invite records for {selected_campaign.name}.</CardDescription>
+              <CardTitle>Candidate progress</CardTitle>
+              <CardDescription>Track each candidate's status for {selected_campaign.name}.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               {selected_campaign.invites.length ? (
@@ -432,11 +437,11 @@ function build_form_state(
     assessment_version_id: campaign?.assessment_version_id ?? versions[0]?.id ?? "",
     deadline: campaign?.deadline ? to_datetime_local(campaign.deadline) : "",
     invite_template:
-      campaign?.invite_template ?? "You are invited to complete the Enterprise Psychometric Assessment for D&H Secheron.",
+      campaign?.invite_template ?? "You are invited to complete an assessment for D&H Secheron. Please use the link provided to begin.",
     name: campaign?.name ?? "",
     reminder_day_interval: campaign?.settings.reminder_schedule?.day_interval ?? 2,
     reminder_enabled: campaign?.settings.reminder_schedule?.enabled ?? false,
-    reminder_template: campaign?.reminder_template ?? "Reminder: your psychometric assessment is pending completion.",
+    reminder_template: campaign?.reminder_template ?? "Reminder: your assessment is still pending. Please complete it at your earliest convenience.",
     role_family_id: campaign?.role_family_id ?? role_families[0]?.id ?? "",
     status: campaign?.status ?? "DRAFT",
   };

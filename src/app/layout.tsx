@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Enterprise Psychometric System",
-  description: "Operational psychometric assessment platform for the D&H Secheron organisation.",
+  title: "D&H Secheron Assessment Platform",
+  description: "Assessment management platform for the D&H Secheron organisation.",
 };
 
 export default function RootLayout({

@@ -29,11 +29,11 @@ export default async function AdminPage() {
   return (
     <div className="space-y-6">
       <section className="space-y-4">
-        <Badge tone="red">Admin operations</Badge>
-        <h1 className="text-4xl font-semibold">Psychometric operations panel</h1>
+        <Badge tone="red">Admin</Badge>
+        <h1 className="text-4xl font-semibold">Admin Panel</h1>
         <p className="max-w-4xl text-base leading-8 text-brand-black/70">
-          Launch assessments, manage role families, control scoring and reporting, and keep every generated test link tied back to a stored
-          assessment record inside the platform.
+          Launch assessments, manage roles and users, configure scoring, and generate test links. Everything stays connected and trackable
+          in one place.
         </p>
       </section>
 
@@ -87,8 +87,8 @@ export default async function AdminPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Operational modules</CardTitle>
-          <CardDescription>Configuration, delivery, reporting, compliance, and system health are all connected from the same workspace now.</CardDescription>
+          <CardTitle>All modules</CardTitle>
+          <CardDescription>Questions, scoring, campaigns, reports, compliance, and more — all accessible from here.</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {tabs.map((tab) => (

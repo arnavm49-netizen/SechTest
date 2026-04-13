@@ -17,9 +17,9 @@ export function AppShell({ children, user }: { children: React.ReactNode; user: 
         <aside className="w-full bg-brand-black px-5 py-6 text-brand-white lg:sticky lg:top-0 lg:h-screen lg:w-[290px] lg:px-6 lg:py-8">
           <div className="space-y-4">
             <div>
-              <p className="text-xs uppercase tracking-[0.32em] text-brand-white/60">Enterprise Psychometric System</p>
+              <p className="text-xs uppercase tracking-[0.32em] text-brand-white/60">Assessment Platform</p>
               <h1 className="mt-3 text-3xl font-semibold leading-tight">D&amp;H Secheron</h1>
-              <p className="mt-3 max-w-xs text-sm leading-6 text-brand-white/70">Assessment operations, administered links, reporting, and governance.</p>
+              <p className="mt-3 max-w-xs text-sm leading-6 text-brand-white/70">Manage assessments, send test invitations, review results, and track team development.</p>
             </div>
 
             <div className="rounded-[1.75rem] border border-brand-white/15 bg-brand-white/8 p-4">
@@ -58,9 +58,9 @@ export function AppShell({ children, user }: { children: React.ReactNode; user: 
         <div className="min-w-0 flex-1 px-4 py-4 sm:px-6 lg:px-8 lg:py-8">
           <header className="flex flex-col gap-4 rounded-[2rem] border border-brand-black/10 bg-brand-white px-5 py-5 shadow-soft sm:flex-row sm:items-center sm:justify-between sm:px-6">
             <div>
-              <p className="text-xs uppercase tracking-[0.28em] text-brand-red">Operating shell</p>
-              <h2 className="mt-2 text-2xl font-semibold">Role-aware assessment workspace</h2>
-              <p className="mt-2 max-w-3xl text-sm leading-6 text-brand-black/70">Login, configuration, direct test administration, and recorded results stay connected here.</p>
+              <p className="text-xs uppercase tracking-[0.28em] text-brand-red">Assessment workspace</p>
+              <h2 className="mt-2 text-2xl font-semibold">Welcome, {user.name.split(" ")[0]}</h2>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-brand-black/70">Manage assessments, send test links, and review results all in one place.</p>
             </div>
             <LogoutButton />
           </header>
