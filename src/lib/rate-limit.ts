@@ -5,8 +5,30 @@ type RateWindow = {
 
 const windows = new Map<string, RateWindow>();
 
+const CLEANUP_INTERVAL_MS = 5 * 60_000;
+let last_cleanup = Date.now();
+
+function cleanup_expired_windows() {
+  const now = Date.now();
+
+  if (now - last_cleanup < CLEANUP_INTERVAL_MS) {
+    return;
+  }
+
+  last_cleanup = now;
+
+  for (const [key, window] of windows) {
+    if (window.reset_at <= now) {
+      windows.delete(key);
+    }
+  }
+}
+
 export function enforce_rate_limit(key: string, limit = 60, window_ms = 60_000) {
   const now = Date.now();
+
+  cleanup_expired_windows();
+
   const current = windows.get(key);
 
   if (!current || current.reset_at <= now) {

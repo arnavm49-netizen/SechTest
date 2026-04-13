@@ -26,7 +26,7 @@ export default async function AdminUsersPage() {
   return (
     <div className="space-y-6">
       <div className="space-y-3">
-        <Badge tone="red">Implemented in Step 1</Badge>
+        <Badge tone="red">Operational module</Badge>
         <h1 className="text-4xl font-semibold">User Management</h1>
         <p className="max-w-4xl text-base leading-8 text-brand-black/70">
           This workspace provides user CRUD, role assignment, activation and deactivation, and CSV bulk import with line-level error

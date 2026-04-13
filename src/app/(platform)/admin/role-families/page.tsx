@@ -1,14 +1,9 @@
-import { PlaceholderModulePage } from "@/components/placeholder-module-page";
+import { RoleFamilyManager } from "@/components/role-family-manager";
 import { require_roles } from "@/lib/auth/session";
+import { get_role_family_manager_snapshot } from "@/lib/role-families";
 
 export default async function RoleFamiliesPage() {
-  await require_roles(["SUPER_ADMIN", "HR_ADMIN"]);
+  const user = await require_roles(["SUPER_ADMIN", "HR_ADMIN"]);
 
-  return (
-    <PlaceholderModulePage
-      delivery_phase="Step 1 shell"
-      summary="Role families are seeded in the database now; the advanced editing experience will expand from this scaffold in follow-on work."
-      title="Role Family Manager"
-    />
-  );
+  return <RoleFamilyManager initial_snapshot={await get_role_family_manager_snapshot(user.org_id)} />;
 }

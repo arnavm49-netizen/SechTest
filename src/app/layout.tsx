@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Enterprise Psychometric System",
-  description: "Step 1 foundation build for the D&H Secheron psychometric platform.",
+  description: "Operational psychometric assessment platform for the D&H Secheron organisation.",
 };
 
 export default function RootLayout({

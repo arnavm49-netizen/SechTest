@@ -180,7 +180,7 @@ export function UserManagement({
         <Card>
           <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <Badge tone="red">Step 1 complete area</Badge>
+              <Badge tone="red">Operational module</Badge>
               <CardTitle className="mt-3">User directory and controls</CardTitle>
               <CardDescription>
                 Manage users, role assignment, activation state, and last-login visibility for the current organisation.

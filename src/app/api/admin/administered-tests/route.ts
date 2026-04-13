@@ -1,8 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import { log_audit_event } from "@/lib/audit";
-import { create_administered_test, create_administered_test_schema } from "@/lib/administered-tests";
+import { create_administered_test, create_administered_test_schema, list_administered_tests } from "@/lib/administered-tests";
 import { get_client_ip, get_request_session_user } from "@/lib/auth/session";
-import { can_access_admin } from "@/lib/rbac";
+import { can_access_admin, can_access_assessor_workspace } from "@/lib/rbac";
+
+export async function GET(request: NextRequest) {
+  const user = await get_request_session_user(request);
+
+  if (!user) {
+    return NextResponse.json({ message: "Authentication required." }, { status: 401 });
+  }
+
+  if (!can_access_admin(user.role) && !can_access_assessor_workspace(user.role)) {
+    return NextResponse.json({ message: "You do not have access to this resource." }, { status: 403 });
+  }
+
+  const administered_tests = await list_administered_tests(user.org_id, request.headers);
+  return NextResponse.json({ administered_tests });
+}
 
 export async function POST(request: NextRequest) {
   const user = await get_request_session_user(request);
@@ -11,7 +26,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ message: "Authentication required." }, { status: 401 });
   }
 
-  if (!can_access_admin(user.role)) {
+  if (!can_access_admin(user.role) && !can_access_assessor_workspace(user.role)) {
     return NextResponse.json({ message: "You do not have access to this resource." }, { status: 403 });
   }
 

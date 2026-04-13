@@ -51,7 +51,7 @@ export default async function DashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle>Accessible workspaces</CardTitle>
-            <CardDescription>These are the areas available to the current role in Step 1.</CardDescription>
+            <CardDescription>These are the areas available to the current role right now.</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
             {can_access_admin(user.role) ? (
@@ -82,7 +82,7 @@ export default async function DashboardPage() {
               <div className="rounded-[1.5rem] bg-brand-grey p-5">
                 <p className="font-semibold">Restricted shell</p>
                 <p className="mt-2 text-sm leading-6 text-brand-black/70">
-                  Candidate and rater access is intentionally narrow in Step 1. They are excluded from admin pages entirely.
+                  Candidate and rater access stays intentionally narrow. They are excluded from admin pages entirely.
                 </p>
               </div>
             ) : null}
