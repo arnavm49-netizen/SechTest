@@ -56,7 +56,7 @@ export async function list_question_bank_items(input: {
   if (input.layer_code) {
     and_filters.push({
       assessment_layer: {
-        code: input.layer_code as never,
+        code: input.layer_code as import("@prisma/client").AssessmentLayerCode,
       },
     });
   }

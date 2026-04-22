@@ -18,10 +18,17 @@ export function RaterWorkspace({ initial_workspace }: { initial_workspace: Rater
       response_time_seconds: 12,
       response_value: Number(form_data.get(item.id)),
     }));
+    const narrative_comments = workspace.rater_items
+      .map((item) => ({
+        item_id: item.id,
+        comment: String(form_data.get(`comment-${item.id}`) ?? "").trim(),
+      }))
+      .filter((c) => c.comment.length > 0);
     const response = await fetch("/api/rater/respond", {
       body: JSON.stringify({
         assignment_id: selected_assignment_id,
         mark_completed: true,
+        narrative_comments: narrative_comments.length > 0 ? narrative_comments : undefined,
         responses,
       }),
       credentials: "include",
@@ -94,13 +101,20 @@ export function RaterWorkspace({ initial_workspace }: { initial_workspace: Rater
                 <label key={item.id} className="block rounded-2xl border border-brand-black/10 px-4 py-4 text-sm">
                   <p className="font-semibold text-brand-black">{item.sub_dimension_name}</p>
                   <p className="mt-1 text-brand-black/70">{item.stem}</p>
-                  <select className="mt-3 w-full rounded-full border border-brand-black/15 px-4 py-3" defaultValue="4" name={item.id}>
+                  <select className="mt-3 w-full rounded-xl border border-brand-black/[0.1] bg-brand-white px-3.5 py-2.5 text-sm outline-none focus:border-brand-black/30" defaultValue="4" name={item.id}>
                     {[1, 2, 3, 4, 5].map((value) => (
                       <option key={value} value={value}>
-                        {value}
+                        {value} — {["Strongly disagree", "Disagree", "Neutral", "Agree", "Strongly agree"][value - 1]}
                       </option>
                     ))}
                   </select>
+                  <textarea
+                    className="mt-2 w-full rounded-xl border border-brand-black/[0.1] bg-brand-white px-3.5 py-2.5 text-[13px] leading-relaxed outline-none placeholder:text-brand-black/30 focus:border-brand-black/30"
+                    maxLength={2000}
+                    name={`comment-${item.id}`}
+                    placeholder="Optional: add a specific example or observation to support your rating..."
+                    rows={2}
+                  />
                 </label>
               ))}
               <Button type="submit">Submit 360 ratings</Button>

@@ -266,6 +266,9 @@ export async function build_individual_report_view(input: {
     }),
     fit: {
       fit_score_pct: latest_fit?.fit_score_pct ?? null,
+      nine_box: latest_fit?.nine_box ?? null,
+      performance_pct: latest_fit?.performance_pct ?? null,
+      potential_pct: latest_fit?.potential_pct ?? null,
       recommendation: latest_fit?.recommendation ?? null,
       top_constraints: as_array(role_fit.top_2_constraints).map(serialize_driver),
       top_drivers: as_array(role_fit.top_3_drivers).map(serialize_driver),

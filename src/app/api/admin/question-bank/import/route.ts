@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
   for (const row of parsed.rows) {
     const layer = await prisma.assessmentLayer.findFirst({
       where: {
-        code: row.data.layer_code as never,
+        code: row.data.layer_code as import("@prisma/client").AssessmentLayerCode,
       },
     });
 

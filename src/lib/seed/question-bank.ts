@@ -364,15 +364,23 @@ function build_personality_items(created_by: string): SeedItem[] {
       continue;
     }
 
+    // Desirability varies by trait — calibrated for manufacturing context
+    const trait_desirability: Record<string, number> = {
+      Conscientiousness: 4.5, Openness: 3.5, "Emotional Stability": 4.2,
+      Extraversion: 3.3, Agreeableness: 3.8, "Risk Appetite": 3.0, "Bias for Action": 4.0,
+    };
     const statements = traits.map((trait, statement_index) => ({
-      desirability_rating: 4,
+      desirability_rating: trait_desirability[trait] ?? 3.5,
       statement: trait_statements[trait][Math.floor((index + statement_index) / 2) % trait_statements[trait].length],
       trait,
     }));
 
+    // Triad-level desirability = average of its statements (for matching quality tracking)
+    const avg_desirability = Math.round((statements.reduce((s, st) => s + st.desirability_rating, 0) / statements.length) * 10) / 10;
+
     triads.push({
       created_by,
-      desirability_rating: 4,
+      desirability_rating: avg_desirability,
       item_type: "FORCED_CHOICE_TRIAD",
       layer_code: "PERSONALITY",
       review_status: "APPROVED",
@@ -387,7 +395,8 @@ function build_personality_items(created_by: string): SeedItem[] {
       stem: "Rank the following statements by dragging one into Most Like Me and one into Least Like Me.",
       sub_dimension_name: String(traits[0]),
       tags: {
-        desirability_band: "4",
+        desirability_band: String(avg_desirability),
+        desirability_spread: Math.round((Math.max(...statements.map((s) => s.desirability_rating)) - Math.min(...statements.map((s) => s.desirability_rating))) * 10) / 10,
         role_family_usage: role_family_segments,
         traits: traits,
       },

@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { NineBoxGrid } from "@/components/nine-box-grid";
 import { HeatmapGrid, RadarChart } from "@/components/report-visuals";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import type { IndividualReportView, TeamHeatmapView } from "@/lib/ui-types";
 
@@ -40,6 +42,25 @@ export function TeamWorkspace({
         </CardHeader>
         <CardContent>
           <HeatmapGrid rows={initial_heatmap.rows} sub_dimensions={initial_heatmap.sub_dimensions} />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>9-Box Talent Grid</CardTitle>
+          <CardDescription>Performance (cognitive + execution + judgment) vs Potential (personality + leadership + motivators). Click a cell to filter the team list below.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <NineBoxGrid
+            entries={initial_reports.map((r) => ({
+              candidate_name: r.assessment.candidate_name,
+              performance_pct: r.fit.performance_pct ?? r.fit.fit_score_pct ?? 50,
+              potential_pct: r.fit.potential_pct ?? r.fit.fit_score_pct ?? 50,
+              role_family: r.assessment.role_family_name,
+              nine_box: r.fit.nine_box ?? "MODERATE_PERFORMANCE_MODERATE_POTENTIAL",
+              fit_score_pct: r.fit.fit_score_pct ?? 0,
+            }))}
+          />
         </CardContent>
       </Card>
 
@@ -109,10 +130,52 @@ export function TeamWorkspace({
                   </CardContent>
                 </Card>
               </div>
+              <GeneratePlanButton assessment_id={selected_report.assessment.assessment_id} candidate_name={selected_report.assessment.candidate_name} />
             </CardContent>
           </Card>
         ) : null}
       </div>
+    </div>
+  );
+}
+
+function GeneratePlanButton({ assessment_id, candidate_name }: { assessment_id: string; candidate_name: string }) {
+  const [status, set_status] = useState<"idle" | "loading" | "done" | "error">("idle");
+  const [plan_summary, set_plan_summary] = useState<string | null>(null);
+
+  async function generate() {
+    set_status("loading");
+    try {
+      const r = await fetch("/api/admin/development/generate-plan", {
+        body: JSON.stringify({ assessment_id }),
+        headers: { "Content-Type": "application/json" },
+        method: "POST",
+        credentials: "include",
+      });
+      const p = await r.json();
+      if (r.ok && p.plan) {
+        set_status("done");
+        set_plan_summary(p.plan.plan_summary ?? "Plan generated successfully.");
+      } else {
+        set_status("error");
+        set_plan_summary(p.message ?? "Unable to generate plan.");
+      }
+    } catch {
+      set_status("error");
+      set_plan_summary("Network error.");
+    }
+  }
+
+  return (
+    <div className="mt-4 space-y-3">
+      <Button disabled={status === "loading"} onClick={generate} variant={status === "done" ? "outline" : "primary"}>
+        {status === "loading" ? "Generating..." : status === "done" ? "Regenerate plan" : `Generate development plan for ${candidate_name.split(" ")[0]}`}
+      </Button>
+      {plan_summary ? (
+        <div className="rounded-xl bg-brand-grey p-4 text-[13px] leading-relaxed text-brand-black/65 whitespace-pre-line">
+          {plan_summary}
+        </div>
+      ) : null}
     </div>
   );
 }

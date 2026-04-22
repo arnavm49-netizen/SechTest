@@ -266,6 +266,9 @@ export type IndividualReportView = {
   }>;
   fit: {
     fit_score_pct: number | null;
+    nine_box: string | null;
+    performance_pct: number | null;
+    potential_pct: number | null;
     recommendation: string | null;
     top_constraints: Array<{
       gap_to_ideal: number | null;

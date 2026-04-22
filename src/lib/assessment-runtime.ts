@@ -498,7 +498,7 @@ async function select_items_for_section(input: {
 }) {
   const layer = await prisma.assessmentLayer.findFirst({
     where: {
-      code: input.layer_code as never,
+      code: input.layer_code as import("@prisma/client").AssessmentLayerCode,
     },
   });
 
@@ -607,7 +607,7 @@ async function recompute_quality_flags(assessment_id: string) {
 async function get_layer_id_by_code(layer_code: string) {
   const layer = await prisma.assessmentLayer.findFirst({
     where: {
-      code: layer_code as never,
+      code: layer_code as import("@prisma/client").AssessmentLayerCode,
     },
   });
 

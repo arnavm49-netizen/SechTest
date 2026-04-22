@@ -26,6 +26,7 @@ type CampaignForm = {
   deadline: string;
   invite_template: string;
   name: string;
+  purpose: "HIRING" | "DEVELOPMENT" | "SUCCESSION";
   reminder_day_interval: number;
   reminder_enabled: boolean;
   reminder_template: string;
@@ -88,6 +89,7 @@ export function CampaignManager({
           deadline: form.deadline || null,
           invite_template: form.invite_template,
           name: form.name,
+          purpose: form.purpose,
           reminder_template: form.reminder_template,
           role_family_id: form.role_family_id,
           settings: {
@@ -237,6 +239,15 @@ export function CampaignManager({
                     {status}
                   </option>
                 ))}
+              </select>
+              <select
+                className="w-full min-w-0 rounded-[1.2rem] border border-brand-black/15 bg-brand-grey px-4 py-3 text-sm outline-none focus:border-brand-red"
+                onChange={(event) => set_form((current) => ({ ...current, purpose: event.target.value as CampaignForm["purpose"] }))}
+                value={form.purpose}
+              >
+                <option value="HIRING">Hiring</option>
+                <option value="DEVELOPMENT">Development</option>
+                <option value="SUCCESSION">Succession</option>
               </select>
               <input
                 className="w-full min-w-0 rounded-[1.2rem] border border-brand-black/15 bg-brand-grey px-4 py-3 text-sm outline-none focus:border-brand-red"
@@ -439,6 +450,7 @@ function build_form_state(
     invite_template:
       campaign?.invite_template ?? "You are invited to complete an assessment for D&H Secheron. Please use the link provided to begin.",
     name: campaign?.name ?? "",
+    purpose: (campaign as Record<string, unknown>)?.purpose as CampaignForm["purpose"] ?? "HIRING",
     reminder_day_interval: campaign?.settings.reminder_schedule?.day_interval ?? 2,
     reminder_enabled: campaign?.settings.reminder_schedule?.enabled ?? false,
     reminder_template: campaign?.reminder_template ?? "Reminder: your assessment is still pending. Please complete it at your earliest convenience.",
