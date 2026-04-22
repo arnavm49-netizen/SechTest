@@ -361,7 +361,7 @@ export async function save_assessment_response(input: {
     await prisma.response.update({
       where: { id: existing_response.id },
       data: {
-        is_flagged: input.response_time_seconds < 3,
+        is_flagged: input.response_time_seconds < 2,
         response_time_seconds: input.response_time_seconds,
         response_value: input.response_value as Prisma.InputJsonValue,
       },
@@ -370,7 +370,7 @@ export async function save_assessment_response(input: {
     await prisma.response.create({
       data: {
         assessment_id: assessment.id,
-        is_flagged: input.response_time_seconds < 3,
+        is_flagged: input.response_time_seconds < 2,
         item_id: input.item_id,
         response_time_seconds: input.response_time_seconds,
         response_value: input.response_value as Prisma.InputJsonValue,
@@ -405,7 +405,9 @@ export async function save_assessment_response(input: {
     data: {
       quality_flags: to_json_input(quality_flags),
       runtime_metadata: merge_runtime_metadata(assessment.runtime_metadata, input.runtime_metadata),
-      status: quality_flags.length > 3 ? "INVALIDATED" : "IN_PROGRESS",
+      // Never auto-invalidate mid-test — let the candidate finish, then HR reviews flags
+      // Quality flags are recorded for post-assessment review, not live intervention
+      status: "IN_PROGRESS",
     },
   });
 
@@ -467,7 +469,8 @@ export async function complete_assessment_from_invite(invite_token: string) {
     ? Math.max(0, Math.round((Date.now() - invite.assessment.started_at.getTime()) / 1000))
     : null;
   const quality_flags = as_record_array(invite.assessment.quality_flags);
-  const status = quality_flags.length > 3 ? "INVALIDATED" : "COMPLETED";
+  // Invalidate only for extreme gaming (10+ flags = systematic pattern, not occasional fast clicks)
+  const status = quality_flags.length > 10 ? "INVALIDATED" : "COMPLETED";
 
   await prisma.assessment.update({
     where: { id: invite.assessment.id },
@@ -571,12 +574,16 @@ async function recompute_quality_flags(assessment_id: string) {
 
   const flags: Array<Record<string, unknown>> = [];
 
+  // Speed anomaly: only flag if response time is under 2 seconds (not 3)
+  // and the item is a scenario or MCQ (Likert can legitimately be fast)
   for (const response of responses) {
-    if ((response.response_time_seconds ?? 0) > 0 && (response.response_time_seconds ?? 0) < 3) {
+    const seconds = response.response_time_seconds ?? 0;
+    const is_complex_item = ["MCQ", "SCENARIO", "SIMULATION", "RANKING"].includes(response.item.item_type);
+    if (seconds > 0 && seconds < 2 && is_complex_item) {
       flags.push({
         item_id: response.item_id,
         reason: "speed_anomaly",
-        response_time_seconds: response.response_time_seconds,
+        response_time_seconds: seconds,
       });
     }
   }
