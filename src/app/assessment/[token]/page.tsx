@@ -14,13 +14,15 @@ export default async function AssessmentInvitePage({ params }: RouteContext) {
 
   if (!session) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-12">
-        <div className="rounded-[2rem] border border-brand-red/20 bg-brand-white px-6 py-10 text-center shadow-soft">
-          <p className="text-sm uppercase tracking-[0.24em] text-brand-red">Link expired</p>
-          <h1 className="mt-3 text-3xl font-semibold">This assessment link is no longer valid</h1>
-          <p className="mt-4 text-sm leading-7 text-brand-black/65">
-            The link may have expired or already been used. Please contact your HR administrator or the person who sent you this link
-            to request a new one.
+      <div className="flex min-h-screen items-center justify-center bg-brand-grey px-5">
+        <div className="max-w-md text-center">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-red/[0.08]">
+            <span className="text-lg text-brand-red">!</span>
+          </div>
+          <h1 className="mt-5 text-xl font-semibold tracking-tight">Link no longer valid</h1>
+          <p className="mt-2 text-[13px] leading-relaxed text-brand-black/50">
+            This assessment link may have expired or already been used. Please contact your HR administrator or the
+            person who sent you this link to request a new one.
           </p>
         </div>
       </div>

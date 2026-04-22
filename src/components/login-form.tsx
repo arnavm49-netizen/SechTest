@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation";
 import { useTransition, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 type LoginMode = "participant" | "admin";
 
@@ -50,82 +49,81 @@ export function LoginForm() {
     });
   }
 
+  const input_class =
+    "w-full rounded-xl border border-brand-black/[0.1] bg-brand-white px-3.5 py-2.5 text-sm text-brand-black placeholder:text-brand-black/30 outline-none transition-colors focus:border-brand-black/30 focus:ring-2 focus:ring-brand-black/[0.06]";
+
   return (
-    <Card className="w-full max-w-[520px] border-brand-black/12">
-      <CardHeader>
-        <div className="flex gap-2">
-          <button
-            className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
-              mode === "participant"
-                ? "border-brand-red bg-brand-red text-brand-white"
-                : "border-brand-black/15 bg-brand-grey text-brand-black hover:border-brand-red/50"
-            }`}
-            onClick={() => switch_mode("participant")}
-            type="button"
-          >
-            Participant
-          </button>
-          <button
-            className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
-              mode === "admin"
-                ? "border-brand-red bg-brand-red text-brand-white"
-                : "border-brand-black/15 bg-brand-grey text-brand-black hover:border-brand-red/50"
-            }`}
-            onClick={() => switch_mode("admin")}
-            type="button"
-          >
-            Administrator
-          </button>
-        </div>
-        <CardTitle className="mt-2 text-3xl">
-          {mode === "participant" ? "Participant login" : "Admin login"}
-        </CardTitle>
-        <CardDescription>
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-semibold tracking-tight">Sign in</h2>
+        <p className="mt-1.5 text-[13px] text-brand-black/50">
           {mode === "participant"
-            ? "Sign in to view your assessment results and feedback reports."
-            : "Sign in to manage assessments, users, and platform settings."}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form className="space-y-4" onSubmit={handle_submit}>
-          <label className="block space-y-2">
-            <span className="text-sm font-semibold text-brand-black">Email</span>
-            <input
-              autoComplete="email"
-              className="w-full min-w-0 rounded-[1.15rem] border border-brand-black/15 bg-brand-grey px-4 py-3 text-sm outline-none transition focus:border-brand-red"
-              onChange={(event) => set_email(event.target.value)}
-              placeholder={mode === "participant" ? "your.name@example.com" : "admin@secheron.example.com"}
-              type="email"
-              value={email}
-            />
-          </label>
+            ? "View your assessment results and feedback reports."
+            : "Manage assessments, users, and platform settings."}
+        </p>
+      </div>
 
-          <label className="block space-y-2">
-            <span className="text-sm font-semibold text-brand-black">Password</span>
-            <input
-              autoComplete="current-password"
-              className="w-full min-w-0 rounded-[1.15rem] border border-brand-black/15 bg-brand-grey px-4 py-3 text-sm outline-none transition focus:border-brand-red"
-              onChange={(event) => set_password(event.target.value)}
-              placeholder="Enter your password"
-              type="password"
-              value={password}
-            />
-          </label>
+      {/* Mode toggle */}
+      <div className="flex rounded-xl bg-brand-black/[0.04] p-1">
+        {(["participant", "admin"] as const).map((m) => (
+          <button
+            className={`flex-1 rounded-lg py-2 text-[13px] font-medium transition-all duration-200 ${
+              mode === m
+                ? "bg-brand-white text-brand-black shadow-sm"
+                : "text-brand-black/45 hover:text-brand-black/65"
+            }`}
+            key={m}
+            onClick={() => switch_mode(m)}
+            type="button"
+          >
+            {m === "participant" ? "Participant" : "Administrator"}
+          </button>
+        ))}
+      </div>
 
-          {error ? <p className="rounded-[1rem] bg-brand-red/10 px-4 py-3 text-sm text-brand-red">{error}</p> : null}
+      <form className="space-y-4" onSubmit={handle_submit}>
+        <label className="block space-y-1.5">
+          <span className="text-[13px] font-medium text-brand-black/70">Email</span>
+          <input
+            autoComplete="email"
+            className={input_class}
+            onChange={(event) => set_email(event.target.value)}
+            placeholder={mode === "participant" ? "your.name@example.com" : "admin@secheron.example.com"}
+            type="email"
+            value={email}
+          />
+        </label>
 
-          <Button className="w-full" disabled={is_pending} type="submit">
-            {is_pending ? "Signing in..." : "Sign in"}
-          </Button>
+        <label className="block space-y-1.5">
+          <span className="text-[13px] font-medium text-brand-black/70">Password</span>
+          <input
+            autoComplete="current-password"
+            className={input_class}
+            onChange={(event) => set_password(event.target.value)}
+            placeholder="Enter your password"
+            type="password"
+            value={password}
+          />
+        </label>
 
-          {mode === "participant" ? (
-            <p className="rounded-[1rem] bg-brand-grey px-4 py-3 text-sm leading-6 text-brand-black/65">
-              Your login credentials were provided when you were registered for the assessment. If you cannot remember them,
-              please contact your HR administrator.
-            </p>
-          ) : null}
-        </form>
-      </CardContent>
-    </Card>
+        {error ? (
+          <div className="rounded-xl bg-red-50 px-3.5 py-2.5 text-[13px] text-brand-red">
+            {error}
+          </div>
+        ) : null}
+
+        <Button className="w-full" disabled={is_pending} type="submit">
+          {is_pending ? "Signing in..." : "Sign in"}
+        </Button>
+
+        {mode === "participant" ? (
+          <p className="text-center text-[12px] leading-relaxed text-brand-black/40">
+            Your credentials were provided when you were registered.
+            <br />
+            Contact your HR administrator if you need help.
+          </p>
+        ) : null}
+      </form>
+    </div>
   );
 }

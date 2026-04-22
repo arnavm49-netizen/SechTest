@@ -2,42 +2,57 @@ import { LoginForm } from "@/components/login-form";
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen bg-brand-grey px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
-      <div className="mx-auto grid min-h-[84vh] max-w-7xl items-center gap-6 lg:grid-cols-[1.02fr_0.98fr]">
-        <section className="space-y-6 rounded-[2.2rem] bg-brand-black px-6 py-8 text-brand-white shadow-soft sm:px-8 lg:px-10">
-          <p className="text-xs uppercase tracking-[0.32em] text-brand-red">D&amp;H Secheron</p>
-          <h1 className="max-w-3xl text-4xl font-semibold leading-tight sm:text-[2.8rem]">
-            Assessment Platform
-          </h1>
-          <p className="max-w-2xl text-base leading-7 text-brand-white/72 sm:text-lg">
-            Complete your assessment, view your results, or manage the assessment process — all from one place.
-          </p>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="rounded-[1.6rem] border border-brand-white/10 bg-brand-white/8 p-5">
-              <p className="text-sm font-semibold">For participants</p>
-              <p className="mt-2 text-sm leading-6 text-brand-white/68">
-                Log in to complete your assessment or view your results and feedback report once it is ready.
-              </p>
+    <div className="flex min-h-screen bg-brand-grey">
+      {/* Left — branding */}
+      <div className="hidden flex-1 flex-col justify-between bg-brand-black p-10 text-brand-white lg:flex xl:p-14">
+        <div>
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-red">
+              <span className="text-xs font-bold text-white">D&amp;H</span>
             </div>
-            <div className="rounded-[1.6rem] border border-brand-white/10 bg-brand-white/8 p-5">
-              <p className="text-sm font-semibold">For administrators</p>
-              <p className="mt-2 text-sm leading-6 text-brand-white/68">
-                Manage users, send test links, configure scoring, and review results across all participants.
-              </p>
-            </div>
+            <span className="text-sm font-semibold tracking-tight">D&amp;H Secheron</span>
           </div>
+        </div>
 
-          <div className="rounded-[1.6rem] border border-brand-white/10 bg-brand-white/5 p-5">
-            <p className="text-sm font-semibold">Have an assessment link?</p>
-            <p className="mt-2 text-sm leading-6 text-brand-white/68">
-              If you received a direct assessment link via email, simply click it to start — no login required. You can log in here
-              afterwards to view your results.
+        <div className="max-w-md space-y-5">
+          <h1 className="text-[2.5rem] font-semibold leading-[1.1] tracking-tight">
+            Assessment
+            <br />
+            Platform
+          </h1>
+          <p className="text-[15px] leading-relaxed text-brand-white/55">
+            Complete your assessment, view your results, or manage the
+            assessment process — all from one place.
+          </p>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="rounded-xl border border-brand-white/[0.08] bg-brand-white/[0.04] p-4">
+            <p className="text-[13px] font-medium">For participants</p>
+            <p className="mt-1.5 text-[12px] leading-relaxed text-brand-white/45">
+              Log in to complete your assessment or view results.
             </p>
           </div>
-        </section>
+          <div className="rounded-xl border border-brand-white/[0.08] bg-brand-white/[0.04] p-4">
+            <p className="text-[13px] font-medium">For administrators</p>
+            <p className="mt-1.5 text-[12px] leading-relaxed text-brand-white/45">
+              Manage users, send test links, and review results.
+            </p>
+          </div>
+        </div>
+      </div>
 
-        <div className="flex justify-center lg:justify-end">
+      {/* Right — login form */}
+      <div className="flex flex-1 items-center justify-center px-5 py-10 sm:px-8 lg:max-w-xl">
+        <div className="w-full max-w-sm">
+          {/* Mobile brand */}
+          <div className="mb-8 flex items-center gap-2.5 lg:hidden">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-red">
+              <span className="text-xs font-bold text-white">D&amp;H</span>
+            </div>
+            <span className="text-sm font-semibold tracking-tight">D&amp;H Secheron</span>
+          </div>
+
           <LoginForm />
         </div>
       </div>

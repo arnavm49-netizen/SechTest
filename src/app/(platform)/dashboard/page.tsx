@@ -29,62 +29,64 @@ export default async function DashboardPage() {
 
   if (is_participant) {
     return (
-      <div className="space-y-6">
-        <section className="space-y-4">
+      <div className="space-y-8">
+        <div>
           <Badge tone="red">Participant</Badge>
-          <h1 className="text-4xl font-semibold">Welcome, {user.name.split(" ")[0]}</h1>
-          <p className="max-w-4xl text-base leading-8 text-brand-black/70">
-            This is your personal dashboard. View your assessment results, download feedback reports, and manage your account from here.
+          <h1 className="mt-3 text-2xl font-semibold tracking-tight">Welcome, {user.name.split(" ")[0]}</h1>
+          <p className="mt-1.5 max-w-2xl text-[14px] leading-relaxed text-brand-black/50">
+            View your assessment results, download feedback reports, and manage your account.
           </p>
-        </section>
+        </div>
 
         {participant_metrics ? (
-          <section className="grid gap-4 md:grid-cols-2">
-            <Card>
-              <CardContent className="py-6">
-                <p className="text-sm uppercase tracking-[0.18em] text-brand-black/55">Total assessments</p>
-                <p className="mt-3 text-4xl font-semibold">{participant_metrics[0]}</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="py-6">
-                <p className="text-sm uppercase tracking-[0.18em] text-brand-black/55">Completed</p>
-                <p className="mt-3 text-4xl font-semibold">{participant_metrics[1]}</p>
-              </CardContent>
-            </Card>
-          </section>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {[
+              { label: "Total assessments", value: participant_metrics[0] },
+              { label: "Completed", value: participant_metrics[1] },
+            ].map((m) => (
+              <Card key={m.label}>
+                <CardContent className="py-5">
+                  <p className="text-[11px] font-medium uppercase tracking-wider text-brand-black/40">{m.label}</p>
+                  <p className="mt-2 text-3xl font-semibold tracking-tight">{m.value}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         ) : null}
 
-        <section className="grid gap-6 xl:grid-cols-2">
-          <a className="block rounded-[1.5rem] border border-brand-black/10 bg-brand-white p-6 shadow-soft transition hover:border-brand-red/30" href="/candidate">
-            <p className="text-lg font-semibold">My results & feedback</p>
-            <p className="mt-2 text-sm leading-6 text-brand-black/70">
-              View your completed assessments and download your personalised feedback reports.
+        <div className="grid gap-4 sm:grid-cols-2">
+          <a
+            className="group rounded-2xl border border-brand-black/[0.06] bg-brand-white p-5 shadow-card transition-all duration-200 hover:shadow-elevated"
+            href="/candidate"
+          >
+            <p className="text-[14px] font-semibold text-brand-black group-hover:text-brand-red">My results &amp; feedback</p>
+            <p className="mt-1.5 text-[13px] leading-relaxed text-brand-black/50">
+              View completed assessments and download your personalised feedback reports.
             </p>
           </a>
-          <div className="rounded-[1.5rem] border border-brand-black/10 bg-brand-white p-6 shadow-soft">
-            <p className="text-lg font-semibold">Need help?</p>
-            <p className="mt-2 text-sm leading-6 text-brand-black/70">
-              If you have questions about your results or need to retake an assessment, please contact your HR administrator.
+          <div className="rounded-2xl border border-brand-black/[0.06] bg-brand-white p-5 shadow-card">
+            <p className="text-[14px] font-semibold">Need help?</p>
+            <p className="mt-1.5 text-[13px] leading-relaxed text-brand-black/50">
+              Contact your HR administrator for questions about results or retaking an assessment.
             </p>
           </div>
-        </section>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <section className="space-y-4">
+    <div className="space-y-8">
+      <div>
         <Badge tone="red">Admin</Badge>
-        <h1 className="text-4xl font-semibold">Dashboard</h1>
-        <p className="max-w-4xl text-base leading-8 text-brand-black/70">
-          Overview of your assessment platform. Manage users, send tests, and review results from here.
+        <h1 className="mt-3 text-2xl font-semibold tracking-tight">Dashboard</h1>
+        <p className="mt-1.5 max-w-2xl text-[14px] leading-relaxed text-brand-black/50">
+          Overview of your assessment platform.
         </p>
-      </section>
+      </div>
 
       {metrics ? (
-        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {[
             { label: "Users", value: metrics[0] },
             { label: "Role families", value: metrics[1] },
@@ -92,43 +94,52 @@ export default async function DashboardPage() {
             { label: "Active campaigns", value: metrics[3] },
           ].map((metric) => (
             <Card key={metric.label}>
-              <CardContent className="py-6">
-                <p className="text-sm uppercase tracking-[0.18em] text-brand-black/55">{metric.label}</p>
-                <p className="mt-3 text-4xl font-semibold">{metric.value}</p>
+              <CardContent className="py-5">
+                <p className="text-[11px] font-medium uppercase tracking-wider text-brand-black/40">{metric.label}</p>
+                <p className="mt-2 text-3xl font-semibold tracking-tight">{metric.value}</p>
               </CardContent>
             </Card>
           ))}
-        </section>
+        </div>
       ) : null}
 
-      <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+      <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
         <Card>
           <CardHeader>
             <CardTitle>Quick access</CardTitle>
             <CardDescription>Jump to the areas you use most.</CardDescription>
           </CardHeader>
-          <CardContent className="grid gap-4">
+          <CardContent className="grid gap-3">
             {can_access_admin(user.role) ? (
-              <a className="block rounded-[1.5rem] bg-brand-grey p-5 transition hover:bg-brand-white" href="/admin">
-                <p className="font-semibold">Admin Panel</p>
-                <p className="mt-2 text-sm leading-6 text-brand-black/70">
-                  Access {admin_tabs.length} modules including user management, question bank, campaigns, reports, and more.
+              <a
+                className="group rounded-xl bg-brand-grey p-4 transition-colors duration-150 hover:bg-brand-grey-dark"
+                href="/admin"
+              >
+                <p className="text-[13px] font-semibold group-hover:text-brand-red">Admin Panel</p>
+                <p className="mt-1 text-[12px] leading-relaxed text-brand-black/50">
+                  Access {admin_tabs.length} modules including user management, question bank, campaigns, and reports.
                 </p>
               </a>
             ) : null}
             {can_access_team(user.role) ? (
-              <a className="block rounded-[1.5rem] bg-brand-grey p-5 transition hover:bg-brand-white" href="/team">
-                <p className="font-semibold">My Team</p>
-                <p className="mt-2 text-sm leading-6 text-brand-black/70">
-                  View your direct reports' assessment results, strengths, and development areas.
+              <a
+                className="group rounded-xl bg-brand-grey p-4 transition-colors duration-150 hover:bg-brand-grey-dark"
+                href="/team"
+              >
+                <p className="text-[13px] font-semibold group-hover:text-brand-red">My Team</p>
+                <p className="mt-1 text-[12px] leading-relaxed text-brand-black/50">
+                  View direct reports' assessment results, strengths, and development areas.
                 </p>
               </a>
             ) : null}
             {can_access_assessor_workspace(user.role) ? (
-              <a className="block rounded-[1.5rem] bg-brand-grey p-5 transition hover:bg-brand-white" href="/assessor">
-                <p className="font-semibold">Test Delivery</p>
-                <p className="mt-2 text-sm leading-6 text-brand-black/70">
-                  Send assessment links to participants, track campaign progress, and monitor completions.
+              <a
+                className="group rounded-xl bg-brand-grey p-4 transition-colors duration-150 hover:bg-brand-grey-dark"
+                href="/assessor"
+              >
+                <p className="text-[13px] font-semibold group-hover:text-brand-red">Test Delivery</p>
+                <p className="mt-1 text-[12px] leading-relaxed text-brand-black/50">
+                  Send assessment links, track campaign progress, and monitor completions.
                 </p>
               </a>
             ) : null}
@@ -137,18 +148,17 @@ export default async function DashboardPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Important notice</CardTitle>
-            <CardDescription>Please read before using assessment results for any decisions.</CardDescription>
+            <CardTitle>Important</CardTitle>
+            <CardDescription>Read before using results for decisions.</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="rounded-[1.5rem] border border-brand-red/25 bg-brand-red/8 p-5 text-sm leading-7 text-brand-black/80">
-              The current skill weights are placeholder defaults. Before using assessment results for hiring or promotion decisions, update
-              them with weights from a proper job analysis. Different roles require different skill mixes — for example, a plant manager
-              needs a very different profile compared to a key account manager.
+            <div className="rounded-xl bg-amber-50 p-4 text-[13px] leading-relaxed text-amber-900/80">
+              Current skill weights are placeholder defaults. Before using assessment results for hiring or promotion
+              decisions, update them with weights from a proper job analysis.
             </div>
           </CardContent>
         </Card>
-      </section>
+      </div>
     </div>
   );
 }

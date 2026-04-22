@@ -1,7 +1,5 @@
 "use client";
 
-import { useEffect } from "react";
-
 export default function GlobalError({
   error,
   unstable_retry,
@@ -9,30 +7,29 @@ export default function GlobalError({
   error: Error & { digest?: string };
   unstable_retry: () => void;
 }) {
-  useEffect(() => {
-    console.error("Application error:", error);
-  }, [error]);
-
   return (
-    <div style={{ display: "flex", minHeight: "100vh", alignItems: "center", justifyContent: "center", fontFamily: "system-ui, sans-serif" }}>
-      <div style={{ textAlign: "center", maxWidth: 420, padding: 32 }}>
-        <h2 style={{ fontSize: 24, fontWeight: 600 }}>Something went wrong</h2>
-        <p style={{ marginTop: 12, color: "#666", lineHeight: 1.6 }}>
-          An unexpected error occurred. Please try again or contact support if the problem persists.
+    <div className="flex min-h-screen items-center justify-center bg-brand-grey px-6">
+      <div className="max-w-sm text-center">
+        <p className="text-5xl font-semibold tracking-tight text-brand-red">Error</p>
+        <h1 className="mt-4 text-xl font-semibold tracking-tight text-brand-black">Something went wrong</h1>
+        <p className="mt-2 text-[13px] leading-relaxed text-brand-black/50">
+          An unexpected error occurred. Please try again.
         </p>
         {error.digest ? (
-          <p style={{ marginTop: 8, fontSize: 12, color: "#999" }}>Reference: {error.digest}</p>
+          <p className="mt-2 text-[11px] text-brand-black/30">Ref: {error.digest}</p>
         ) : null}
-        <div style={{ marginTop: 24, display: "flex", gap: 12, justifyContent: "center" }}>
+        <div className="mt-6 flex items-center justify-center gap-3">
           <button
+            className="inline-flex h-10 items-center justify-center rounded-xl bg-brand-black px-5 text-sm font-medium text-brand-white transition-colors hover:bg-brand-black/85"
             onClick={unstable_retry}
-            style={{ padding: "8px 20px", borderRadius: 9999, border: "1px solid #c41e3a", background: "#c41e3a", color: "#fff", fontWeight: 600, fontSize: 14, cursor: "pointer" }}
+            type="button"
           >
-            Retry
+            Try again
           </button>
           <button
+            className="inline-flex h-10 items-center justify-center rounded-xl border border-brand-black/[0.12] bg-brand-white px-5 text-sm font-medium text-brand-black transition-colors hover:bg-brand-grey"
             onClick={() => (window.location.href = "/")}
-            style={{ padding: "8px 20px", borderRadius: 9999, border: "1px solid #222", background: "#fff", color: "#222", fontWeight: 600, fontSize: 14, cursor: "pointer" }}
+            type="button"
           >
             Go home
           </button>

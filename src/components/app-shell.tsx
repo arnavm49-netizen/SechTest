@@ -25,71 +25,78 @@ export function AppShell({ children, user }: { children: React.ReactNode; user: 
 
   return (
     <div className="min-h-screen bg-brand-grey text-brand-black">
-      <div className="mx-auto flex min-h-screen max-w-[1600px] flex-col lg:flex-row">
-        <aside className="w-full bg-brand-black px-5 py-6 text-brand-white lg:sticky lg:top-0 lg:h-screen lg:w-[290px] lg:px-6 lg:py-8">
-          <div className="space-y-4">
-            <div>
-              <p className="text-xs uppercase tracking-[0.32em] text-brand-white/60">D&amp;H Secheron</p>
-              <h1 className="mt-3 text-3xl font-semibold leading-tight">
-                {is_participant ? "My Assessments" : "Assessment Platform"}
-              </h1>
-              <p className="mt-3 max-w-xs text-sm leading-6 text-brand-white/70">
-                {is_participant
-                  ? "View your assessment results, download feedback reports, and manage your account."
-                  : "Manage assessments, send test invitations, review results, and track team development."}
-              </p>
-            </div>
+      <div className="mx-auto flex min-h-screen max-w-[1440px] flex-col lg:flex-row">
 
-            <div className="rounded-[1.75rem] border border-brand-white/15 bg-brand-white/8 p-4">
-              <p className="text-xs uppercase tracking-[0.24em] text-brand-white/60">Signed in as</p>
-              <p className="mt-2 text-lg font-semibold">{user.name}</p>
-              <p className="text-sm text-brand-white/72">{user.email}</p>
-              <p className="mt-3 text-sm text-brand-red">{get_role_badge(user.role)}</p>
+        {/* ── Sidebar ── */}
+        <aside className="flex w-full flex-col bg-brand-white/80 backdrop-blur-xl lg:sticky lg:top-0 lg:h-screen lg:w-[260px] lg:border-r lg:border-brand-black/[0.06]">
+
+          {/* Brand */}
+          <div className="px-5 pt-6 pb-4 lg:px-6 lg:pt-8">
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-red">
+                <span className="text-xs font-bold text-white">D&amp;H</span>
+              </div>
+              <div>
+                <p className="text-[13px] font-semibold text-brand-black">
+                  {is_participant ? "My Assessments" : "Assessment Platform"}
+                </p>
+                <p className="text-[11px] text-brand-black/45">D&amp;H Secheron</p>
+              </div>
             </div>
           </div>
 
-          <nav className="mt-8 grid gap-2">
+          {/* Navigation */}
+          <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-2 lg:px-4">
             {navigation.map((item) => {
               const is_active = pathname === item.href || pathname.startsWith(`${item.href}/`);
 
               return (
                 <Link
                   className={cn(
-                    "rounded-[1.4rem] border px-4 py-3 transition",
+                    "group flex flex-col rounded-xl px-3 py-2.5 transition-colors duration-150",
                     is_active
-                      ? "border-brand-red bg-brand-red text-brand-white"
-                      : "border-brand-white/12 bg-transparent text-brand-white/78 hover:border-brand-red/50 hover:text-brand-white",
+                      ? "bg-brand-black text-brand-white"
+                      : "text-brand-black/65 hover:bg-brand-black/[0.04] hover:text-brand-black",
                   )}
                   href={item.href}
                   key={item.href}
                 >
-                  <p className="text-sm font-semibold">{item.label}</p>
-                  <p className={cn("mt-1 max-w-[16rem] text-xs leading-5", is_active ? "text-brand-white/85" : "text-brand-white/55")}>
+                  <span className="text-[13px] font-medium">{item.label}</span>
+                  <span
+                    className={cn(
+                      "mt-0.5 text-[11px] leading-snug",
+                      is_active ? "text-brand-white/60" : "text-brand-black/40",
+                    )}
+                  >
                     {item.description}
-                  </p>
+                  </span>
                 </Link>
               );
             })}
           </nav>
+
+          {/* User */}
+          <div className="border-t border-brand-black/[0.06] px-4 py-4 lg:px-5">
+            <div className="flex items-center justify-between">
+              <div className="min-w-0">
+                <p className="truncate text-[13px] font-medium text-brand-black">{user.name}</p>
+                <p className="truncate text-[11px] text-brand-black/45">{get_role_badge(user.role)}</p>
+              </div>
+              <LogoutButton />
+            </div>
+          </div>
         </aside>
 
-        <div className="min-w-0 flex-1 px-4 py-4 sm:px-6 lg:px-8 lg:py-8">
-          <header className="flex flex-col gap-4 rounded-[2rem] border border-brand-black/10 bg-brand-white px-5 py-5 shadow-soft sm:flex-row sm:items-center sm:justify-between sm:px-6">
-            <div>
-              <p className="text-xs uppercase tracking-[0.28em] text-brand-red">
-                {is_participant ? "Participant portal" : "Admin workspace"}
-              </p>
-              <h2 className="mt-2 text-2xl font-semibold">Welcome, {user.name.split(" ")[0]}</h2>
-              <p className="mt-2 max-w-3xl text-sm leading-6 text-brand-black/70">
-                {is_participant
-                  ? "View your results and download your feedback report."
-                  : "Manage assessments, send test links, and review results."}
-              </p>
-            </div>
-            <LogoutButton />
+        {/* ── Main content ── */}
+        <div className="min-w-0 flex-1">
+          <header className="sticky top-0 z-10 border-b border-brand-black/[0.06] bg-brand-grey/80 px-5 py-4 backdrop-blur-xl sm:px-8 lg:px-10">
+            <p className="text-[11px] font-medium uppercase tracking-wider text-brand-red">
+              {is_participant ? "Participant portal" : "Admin workspace"}
+            </p>
+            <h2 className="mt-1 text-xl font-semibold tracking-tight">Welcome back, {user.name.split(" ")[0]}</h2>
           </header>
 
-          <main className="min-w-0 py-6">{children}</main>
+          <main className="px-5 py-6 sm:px-8 lg:px-10 lg:py-8">{children}</main>
         </div>
       </div>
     </div>
