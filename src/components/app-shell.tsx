@@ -55,7 +55,7 @@ export function AppShell({ children, user }: { children: React.ReactNode; user: 
                   className={cn(
                     "group flex flex-col rounded-xl px-3 py-2.5 transition-colors duration-150",
                     is_active
-                      ? "bg-brand-black text-brand-white"
+                      ? "bg-brand-red/[0.08] text-brand-red"
                       : "text-brand-black/65 hover:bg-brand-black/[0.04] hover:text-brand-black",
                   )}
                   href={item.href}
@@ -65,7 +65,7 @@ export function AppShell({ children, user }: { children: React.ReactNode; user: 
                   <span
                     className={cn(
                       "mt-0.5 text-[11px] leading-snug",
-                      is_active ? "text-brand-white/60" : "text-brand-black/40",
+                      is_active ? "text-brand-red/60" : "text-brand-black/40",
                     )}
                   >
                     {item.description}

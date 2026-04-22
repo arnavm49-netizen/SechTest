@@ -522,26 +522,42 @@ async function select_items_for_section(input: {
     })
   ).map((response) => response.item_id);
 
-  const items = await prisma.item.findMany({
-    where: {
-      deleted_at: null,
-      id: { notIn: recent_item_ids },
-      is_active: true,
-      item_type: { in: input.item_type_filters },
-      layer_id: layer.id,
-      review_status: "APPROVED",
-    },
+  // Base query: approved, active items for this layer and type
+  const base_where = {
+    deleted_at: null,
+    is_active: true,
+    item_type: { in: input.item_type_filters },
+    layer_id: layer.id,
+    review_status: "APPROVED" as const,
+  };
+
+  // First try: exclude recently used items
+  let items = await prisma.item.findMany({
+    where: { ...base_where, id: { notIn: recent_item_ids } },
     orderBy: [{ exposure_count: "asc" }, { updated_at: "desc" }],
   });
 
-  const filtered = input.tag_filters
-    ? items.filter((item) => {
-        const tags = (item.tags as Record<string, unknown> | null) ?? {};
-        return Object.entries(input.tag_filters ?? {}).every(([key, value]) => tags[key] === value);
-      })
-    : items;
+  // Apply tag filters if present
+  if (input.tag_filters) {
+    const tag_filtered = items.filter((item) => {
+      const tags = (item.tags as Record<string, unknown> | null) ?? {};
+      return Object.entries(input.tag_filters ?? {}).every(([key, value]) => tags[key] === value);
+    });
+    // Only use tag-filtered results if enough items; otherwise drop tag filter
+    if (tag_filtered.length >= input.item_count) {
+      items = tag_filtered;
+    }
+  }
 
-  return shuffle(filtered).slice(0, input.item_count);
+  // Fallback: if not enough items after excluding recent, include all items
+  if (items.length < input.item_count) {
+    items = await prisma.item.findMany({
+      where: base_where,
+      orderBy: [{ exposure_count: "asc" }, { updated_at: "desc" }],
+    });
+  }
+
+  return shuffle(items).slice(0, input.item_count);
 }
 
 async function recompute_quality_flags(assessment_id: string) {
@@ -625,10 +641,16 @@ function serialize_public_item(item: {
     item_type: item.item_type,
     options: normalize_item_options(item.options, item.item_options),
     scoring_key: as_record_or_null(item.scoring_key),
-    stem: item.stem,
+    stem: strip_seed_markers(item.stem),
     tags: as_record_or_null(item.tags),
     time_limit_seconds: item.time_limit_seconds,
   };
+}
+
+function strip_seed_markers(stem: string): string {
+  return stem
+    .replace(/\s*\[(?:Seed|Exp|Variant|Rank|Timed|Sim|Pair|Leadership self-SJT|SJT|Expanded)\s*\d*\]\s*/gi, "")
+    .trim();
 }
 
 function shuffle<T>(values: T[]) {

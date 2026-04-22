@@ -592,7 +592,11 @@ function QSortSection({
 }
 
 function all_sections_complete(session?: AssessmentSession) {
-  return Boolean(session?.assessment?.sections.every((s) => s.responses.length >= s.items.length));
+  const sections = session?.assessment?.sections;
+  if (!sections?.length) return false;
+  // Don't auto-complete if any section has zero items (configuration error)
+  if (sections.some((s) => s.items.length === 0)) return false;
+  return sections.every((s) => s.responses.length >= s.items.length);
 }
 
 function get_runtime_metadata() {
