@@ -9,6 +9,7 @@ import { default_scoring_model_config } from "../src/lib/scoring/config";
 import { run_scoring_for_assessment } from "../src/lib/scoring-service";
 import { build_step_two_question_bank } from "../src/lib/seed/question-bank";
 import { build_expanded_question_bank } from "../src/lib/seed/question-bank-expanded";
+import { build_strategic_question_bank } from "../src/lib/seed/question-bank-strategic";
 
 type SeedOptions = {
   purge_existing?: boolean;
@@ -215,9 +216,9 @@ export async function seed_demo_dataset(options: SeedOptions = {}) {
   const layer_lookup = new Map(layers.map((layer) => [layer.code, layer]));
 
   const sub_dimension_seed: Record<AssessmentLayerCode, string[]> = {
-    COGNITIVE: ["Logical reasoning", "Numerical reasoning", "Abstract pattern recognition", "Verbal reasoning"],
+    COGNITIVE: ["Logical reasoning", "Numerical reasoning", "Abstract pattern recognition", "Verbal reasoning", "Learning agility"],
     EXECUTION: ["Planning ability", "Prioritisation", "Closure rate", "Process discipline", "Attention to detail"],
-    LEADERSHIP: ["Influence", "Conflict handling", "Feedback receptivity", "Delegation", "Team energy"],
+    LEADERSHIP: ["Influence", "Conflict handling", "Feedback receptivity", "Delegation", "Team energy", "Strategic thinking", "Change leadership"],
     MOTIVATORS: [
       "Financial vs Mastery vs Purpose",
       "Stability vs Growth",
@@ -239,6 +240,7 @@ export async function seed_demo_dataset(options: SeedOptions = {}) {
       "Resource constraint decisions",
       "Escalation judgment",
       "Ethical boundary recognition",
+      "Commercial acumen",
     ],
   };
 
@@ -270,77 +272,120 @@ export async function seed_demo_dataset(options: SeedOptions = {}) {
 
   const sub_dimension_lookup = new Map(created_sub_dimensions.map((entry) => [entry.name, entry]));
 
-  const role_family_seed = [
+  const role_family_seed: Array<{
+    description: string;
+    name: string;
+    seniority_level: "INDIVIDUAL_CONTRIBUTOR" | "FIRST_LINE_MANAGER" | "MIDDLE_MANAGER" | "SENIOR_LEADER" | "EXECUTIVE";
+    weight_matrix: Record<string, number>;
+  }> = [
     {
       description: "Industrial leadership role balancing plant reliability, people leadership, and judgment under operating constraints.",
       name: "Plant Operations Manager",
-      weight_matrix: { COGNITIVE: 18, PERSONALITY: 14, MOTIVATORS: 10, EXECUTION: 24, LEADERSHIP: 14, SJT: 20 },
+      seniority_level: "MIDDLE_MANAGER",
+      weight_matrix: { COGNITIVE: 16, PERSONALITY: 14, MOTIVATORS: 10, EXECUTION: 22, LEADERSHIP: 18, SJT: 20 },
     },
     {
       description: "Commercial leadership role for high-relationship account growth and execution across strategic customers.",
       name: "Key Account Manager",
-      weight_matrix: { COGNITIVE: 15, PERSONALITY: 15, MOTIVATORS: 20, EXECUTION: 15, LEADERSHIP: 20, SJT: 15 },
+      seniority_level: "MIDDLE_MANAGER",
+      weight_matrix: { COGNITIVE: 14, PERSONALITY: 15, MOTIVATORS: 16, EXECUTION: 15, LEADERSHIP: 18, SJT: 22 },
     },
     {
       description: "Application-led technical role combining analytical horsepower with customer and plant-side problem solving.",
       name: "Application / R&D Engineer",
-      weight_matrix: { COGNITIVE: 25, PERSONALITY: 10, MOTIVATORS: 15, EXECUTION: 20, LEADERSHIP: 10, SJT: 20 },
+      seniority_level: "INDIVIDUAL_CONTRIBUTOR",
+      weight_matrix: { COGNITIVE: 25, PERSONALITY: 14, MOTIVATORS: 15, EXECUTION: 20, LEADERSHIP: 8, SJT: 18 },
     },
     {
       description: "Business unit leadership role needing balanced commercial, people, and strategic judgment across functions.",
       name: "Business Unit Leader",
-      weight_matrix: { COGNITIVE: 20, PERSONALITY: 15, MOTIVATORS: 15, EXECUTION: 15, LEADERSHIP: 20, SJT: 15 },
+      seniority_level: "SENIOR_LEADER",
+      weight_matrix: { COGNITIVE: 16, PERSONALITY: 14, MOTIVATORS: 12, EXECUTION: 14, LEADERSHIP: 22, SJT: 22 },
     },
     {
       description: "Growth-facing sales role in industrial and export contexts where judgment and influence drive outcomes.",
       name: "Sales / BD",
-      weight_matrix: { COGNITIVE: 20, PERSONALITY: 15, MOTIVATORS: 10, EXECUTION: 20, LEADERSHIP: 15, SJT: 20 },
+      seniority_level: "INDIVIDUAL_CONTRIBUTOR",
+      weight_matrix: { COGNITIVE: 16, PERSONALITY: 15, MOTIVATORS: 18, EXECUTION: 15, LEADERSHIP: 14, SJT: 22 },
     },
     {
       description: "Commercial relationship role focused on strategic account stewardship, negotiation, and delivery integrity.",
       name: "Commercial / KAM",
-      weight_matrix: { COGNITIVE: 20, PERSONALITY: 20, MOTIVATORS: 10, EXECUTION: 20, LEADERSHIP: 10, SJT: 20 },
+      seniority_level: "MIDDLE_MANAGER",
+      weight_matrix: { COGNITIVE: 16, PERSONALITY: 18, MOTIVATORS: 14, EXECUTION: 18, LEADERSHIP: 12, SJT: 22 },
     },
-    // ── New role families ──
     {
       description: "Finance and accounting leadership role requiring analytical rigour, process discipline, and stakeholder reporting.",
       name: "Finance Manager",
-      weight_matrix: { COGNITIVE: 22, PERSONALITY: 12, MOTIVATORS: 10, EXECUTION: 26, LEADERSHIP: 10, SJT: 20 },
+      seniority_level: "MIDDLE_MANAGER",
+      weight_matrix: { COGNITIVE: 22, PERSONALITY: 14, MOTIVATORS: 15, EXECUTION: 22, LEADERSHIP: 10, SJT: 17 },
     },
     {
       description: "People and culture leadership role focused on employee experience, policy, and organisational development.",
       name: "HR Business Partner",
+      seniority_level: "MIDDLE_MANAGER",
       weight_matrix: { COGNITIVE: 15, PERSONALITY: 20, MOTIVATORS: 15, EXECUTION: 12, LEADERSHIP: 22, SJT: 16 },
     },
     {
       description: "Quality assurance role requiring attention to detail, process compliance, and continuous improvement mindset.",
       name: "Quality Assurance Lead",
+      seniority_level: "FIRST_LINE_MANAGER",
       weight_matrix: { COGNITIVE: 20, PERSONALITY: 12, MOTIVATORS: 10, EXECUTION: 28, LEADERSHIP: 10, SJT: 20 },
     },
     {
       description: "Supply chain and procurement role balancing vendor management, cost optimisation, and delivery reliability.",
       name: "Supply Chain Manager",
+      seniority_level: "MIDDLE_MANAGER",
       weight_matrix: { COGNITIVE: 18, PERSONALITY: 14, MOTIVATORS: 12, EXECUTION: 24, LEADERSHIP: 12, SJT: 20 },
     },
     {
       description: "Information technology leadership role combining technical problem-solving with project delivery and stakeholder management.",
       name: "IT / Digital Lead",
+      seniority_level: "MIDDLE_MANAGER",
       weight_matrix: { COGNITIVE: 24, PERSONALITY: 12, MOTIVATORS: 14, EXECUTION: 20, LEADERSHIP: 12, SJT: 18 },
     },
     {
       description: "Customer service and support role requiring empathy, communication, and rapid problem resolution.",
       name: "Customer Service Lead",
+      seniority_level: "FIRST_LINE_MANAGER",
       weight_matrix: { COGNITIVE: 14, PERSONALITY: 22, MOTIVATORS: 14, EXECUTION: 16, LEADERSHIP: 16, SJT: 18 },
     },
     {
       description: "Health, safety, and environment role requiring compliance orientation, risk awareness, and influence across operations.",
       name: "HSE Officer",
+      seniority_level: "INDIVIDUAL_CONTRIBUTOR",
       weight_matrix: { COGNITIVE: 16, PERSONALITY: 14, MOTIVATORS: 10, EXECUTION: 24, LEADERSHIP: 14, SJT: 22 },
     },
     {
       description: "Graduate and early-career talent entry point emphasising learning agility, cognitive potential, and motivational fit.",
       name: "Graduate Trainee",
-      weight_matrix: { COGNITIVE: 28, PERSONALITY: 16, MOTIVATORS: 18, EXECUTION: 14, LEADERSHIP: 8, SJT: 16 },
+      seniority_level: "INDIVIDUAL_CONTRIBUTOR",
+      weight_matrix: { COGNITIVE: 24, PERSONALITY: 16, MOTIVATORS: 18, EXECUTION: 18, LEADERSHIP: 8, SJT: 16 },
+    },
+    // ── Senior/executive variants ──
+    {
+      description: "Senior plant leadership role overseeing multiple lines or sites, balancing strategic investment, safety culture, and operational excellence.",
+      name: "Senior Plant Director",
+      seniority_level: "SENIOR_LEADER",
+      weight_matrix: { COGNITIVE: 14, PERSONALITY: 14, MOTIVATORS: 10, EXECUTION: 18, LEADERSHIP: 24, SJT: 20 },
+    },
+    {
+      description: "Executive commercial leadership driving revenue strategy, key account portfolio, and market expansion across geographies.",
+      name: "Commercial Director",
+      seniority_level: "EXECUTIVE",
+      weight_matrix: { COGNITIVE: 14, PERSONALITY: 16, MOTIVATORS: 12, EXECUTION: 12, LEADERSHIP: 22, SJT: 24 },
+    },
+    {
+      description: "Chief operating role responsible for end-to-end operations, supply chain, manufacturing, and quality across the enterprise.",
+      name: "COO / Head of Operations",
+      seniority_level: "EXECUTIVE",
+      weight_matrix: { COGNITIVE: 14, PERSONALITY: 14, MOTIVATORS: 10, EXECUTION: 16, LEADERSHIP: 24, SJT: 22 },
+    },
+    {
+      description: "Chief human resources role driving talent strategy, organisational design, and culture transformation.",
+      name: "CHRO / Head of HR",
+      seniority_level: "EXECUTIVE",
+      weight_matrix: { COGNITIVE: 14, PERSONALITY: 18, MOTIVATORS: 14, EXECUTION: 10, LEADERSHIP: 26, SJT: 18 },
     },
   ];
 
@@ -350,6 +395,7 @@ export async function seed_demo_dataset(options: SeedOptions = {}) {
       description: role_family.description,
       name: role_family.name,
       org_id: organization.id,
+      seniority_level: role_family.seniority_level,
       weight_matrix: role_family.weight_matrix,
     })),
   });
@@ -602,6 +648,65 @@ export async function seed_demo_dataset(options: SeedOptions = {}) {
       data: {
         changed_by: super_admin.id,
         change_notes: "Expanded seed version 1",
+        item_id: item.id,
+        options_snapshot: to_nullable_json_input(seed_item.item_options ?? []),
+        scoring_key_snapshot: to_nullable_json_input(seed_item.scoring_key),
+        stem_snapshot: seed_item.stem,
+        version_number: 1,
+      },
+    });
+  }
+
+  // ── Strategic question bank (new sub-dimensions: learning agility, strategic thinking, change leadership, commercial acumen) ──
+  const strategic_bank = build_strategic_question_bank(super_admin.id);
+
+  for (const seed_item of strategic_bank) {
+    const layer = layer_lookup.get(seed_item.layer_code);
+    const sub_dimension = sub_dimension_lookup.get(seed_item.sub_dimension_name);
+
+    if (!layer || !sub_dimension) {
+      continue;
+    }
+
+    const item = await prisma.item.create({
+      data: {
+        correct_answer: to_nullable_json_input(seed_item.correct_answer),
+        created_by: seed_item.created_by,
+        desirability_rating: seed_item.desirability_rating ?? null,
+        difficulty_b: seed_item.difficulty_b ?? null,
+        discrimination_a: seed_item.discrimination_a ?? null,
+        guessing_c: seed_item.guessing_c ?? null,
+        item_type: seed_item.item_type,
+        layer_id: layer.id,
+        options: {
+          editor_options: seed_item.item_options ?? [],
+          tag_metadata: seed_item.tags ?? {},
+        },
+        review_status: seed_item.review_status,
+        scoring_key: to_nullable_json_input(seed_item.scoring_key),
+        stem: seed_item.stem,
+        sub_dimension_id: sub_dimension.id,
+        tags: seed_item.tags ?? {},
+        time_limit_seconds: seed_item.time_limit_seconds ?? null,
+      },
+    });
+
+    if (seed_item.item_options?.length) {
+      await prisma.itemOption.createMany({
+        data: seed_item.item_options.map((option) => ({
+          display_order: option.display_order,
+          is_correct: option.is_correct ?? false,
+          item_id: item.id,
+          option_text: option.option_text,
+          score_weight: option.score_weight ?? 0,
+        })),
+      });
+    }
+
+    await prisma.questionVersion.create({
+      data: {
+        changed_by: super_admin.id,
+        change_notes: "Strategic seed version 1",
         item_id: item.id,
         options_snapshot: to_nullable_json_input(seed_item.item_options ?? []),
         scoring_key_snapshot: to_nullable_json_input(seed_item.scoring_key),

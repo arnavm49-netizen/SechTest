@@ -301,6 +301,141 @@ const INTERVENTION_LIBRARY: Record<string, Record<string, InterventionTemplate[]
       },
     ],
   },
+
+  // ── NEW DIMENSIONS ──
+
+  "Learning agility": {
+    low: [
+      {
+        intervention_type: "EXPERIENTIAL_LEARNING",
+        title: "Learning agility acceleration",
+        description: "Build the ability to learn quickly from new situations, extract patterns from unfamiliar contexts, and apply lessons across domains.",
+        actions: [
+          "Volunteer for one assignment outside your comfort zone per quarter (cross-functional, new geography, unfamiliar customer segment)",
+          "After each new experience, write a 1-page reflection: what surprised you, what you got wrong, what you would do differently",
+          "Find one person in the organisation who operates in a very different way from you — shadow them for a day and document 3 things you learned",
+          "When you receive negative feedback, write down 'what is true in this feedback?' before responding",
+          "Read one book or article per month from an industry completely outside manufacturing — identify one idea that applies to your work",
+        ],
+        success_criteria: "Peers and manager observe faster adaptation to new situations. Demonstrates pattern transfer from one context to another. Recovery time from mistakes visibly decreases.",
+        timeline_weeks: 12,
+      },
+    ],
+    medium: [
+      {
+        intervention_type: "STRETCH_ASSIGNMENT",
+        title: "Cross-domain leadership exposure",
+        description: "Deepen learning agility by leading initiatives outside your primary expertise area.",
+        actions: [
+          "Lead or co-lead one cross-functional project where you are not the subject-matter expert",
+          "Build a 'learning journal' — document one insight per week from situations where your initial assumptions were wrong",
+          "Mentor someone in a completely different function — teaching forces you to learn their context deeply",
+          "After every project, run a personal 'after-action review' with 3 questions: what worked, what didn't, what would I do differently",
+        ],
+        success_criteria: "Successfully delivers outcomes in unfamiliar domains. Proactively seeks learning from failure. Others seek you out for novel problem-solving.",
+        timeline_weeks: 10,
+      },
+    ],
+  },
+  "Strategic thinking": {
+    low: [
+      {
+        intervention_type: "STRATEGIC_EXPOSURE",
+        title: "Strategic thinking foundations",
+        description: "Build the habit of connecting operational decisions to longer-term strategic outcomes through structured analysis and exposure.",
+        actions: [
+          "Read your company's annual report and strategy document — identify 3 strategic priorities and how your role connects to each",
+          "Before every major decision, write one sentence answering: 'How does this choice affect our position 2 years from now?'",
+          "Attend one industry conference or webinar per quarter — summarise trends and implications for your team",
+          "Practice the 'zoom out' technique: when solving an operational problem, ask 'what is the systemic cause behind this symptom?'",
+          "Have a quarterly conversation with your skip-level manager about the business landscape and competitive dynamics",
+        ],
+        success_criteria: "Decisions explicitly reference strategic context. Can articulate the company's top 3 strategic priorities and their role's connection to each.",
+        timeline_weeks: 10,
+      },
+    ],
+    medium: [
+      {
+        intervention_type: "EXECUTIVE_PRACTICE",
+        title: "Strategic leadership and systems thinking",
+        description: "Move from understanding strategy to shaping it — build the ability to identify opportunities, anticipate threats, and influence direction.",
+        actions: [
+          "Build a competitive landscape map for your business unit: who competes where, on what basis, and where are the gaps",
+          "Present a strategic recommendation to your leadership team based on data and competitive analysis",
+          "Identify one 'weak signal' in your industry (emerging technology, regulatory shift, customer behaviour change) and develop a position on what the company should do about it",
+          "Run a scenario planning exercise with your team: 'what happens if [key assumption] is wrong?'",
+        ],
+        success_criteria: "Proactively identifies strategic opportunities. Leadership team seeks your perspective on directional decisions. Can present a coherent strategic argument with evidence.",
+        timeline_weeks: 12,
+      },
+    ],
+  },
+  "Change leadership": {
+    low: [
+      {
+        intervention_type: "CHANGE_MANAGEMENT",
+        title: "Leading change effectively",
+        description: "Build the skills to lead people through change — from building the case, to managing resistance, to sustaining momentum.",
+        actions: [
+          "Study one change framework (Kotter's 8 steps, ADKAR, or Bridges' transitions) and apply it to a current change initiative in your area",
+          "Before your next change initiative, map stakeholders into 4 groups: champions, supporters, fence-sitters, resistors — develop a specific approach for each",
+          "Practice the 'empathy-then-direction' pattern: acknowledge what people are losing before explaining what they are gaining",
+          "Identify 2 change champions in your team and give them early access, information, and influence over the rollout",
+          "Celebrate one visible 'early win' within the first 3 weeks of any change — make it public",
+        ],
+        success_criteria: "Change initiatives sustain beyond the initial push. Team resistance decreases over time. Can identify and activate change champions.",
+        timeline_weeks: 10,
+      },
+    ],
+    medium: [
+      {
+        intervention_type: "TRANSFORMATION_LEADERSHIP",
+        title: "Scaling change across teams",
+        description: "Advance from leading change within your team to driving change across multiple teams or the broader organisation.",
+        actions: [
+          "Lead a cross-functional change initiative (new process, new tool, new way of working) end-to-end",
+          "Build a change communication plan: what you'll say, to whom, when, and through what channel",
+          "Conduct a retrospective with the team 90 days after a change: what stuck, what reverted, and why",
+          "Coach another manager through their own change initiative — transfer your methods",
+        ],
+        success_criteria: "Cross-functional change initiatives land successfully. Changes sustain beyond 90 days. Other managers seek your advice on managing change.",
+        timeline_weeks: 12,
+      },
+    ],
+  },
+  "Commercial acumen": {
+    low: [
+      {
+        intervention_type: "BUSINESS_LITERACY",
+        title: "Commercial and market awareness",
+        description: "Build understanding of how the business makes money, how customers make buying decisions, and how competitive dynamics shape strategy.",
+        actions: [
+          "Spend half a day with the sales team — attend a customer call or visit and observe how they sell",
+          "Read the company's P&L statement — identify the top 3 revenue drivers and the top 3 cost drivers",
+          "Map your top 5 customers by revenue, margin, and strategic importance — discuss with your manager why each matters",
+          "Identify one competitor's recent move (new product, price change, market entry) and write a one-page analysis of what it means for your team",
+          "Ask your manager or commercial lead: 'What do our best customers value most about us, and where do we lose deals?'",
+        ],
+        success_criteria: "Can articulate the business model and competitive position. Decisions reflect awareness of commercial impact. Sales team reports improved collaboration.",
+        timeline_weeks: 8,
+      },
+    ],
+    medium: [
+      {
+        intervention_type: "COMMERCIAL_LEADERSHIP",
+        title: "Value-based commercial thinking",
+        description: "Move from understanding the business to actively driving commercial outcomes — pricing, customer strategy, and competitive positioning.",
+        actions: [
+          "Build a total-cost-of-ownership (TCO) analysis for your top product with a key customer — quantify the value beyond unit price",
+          "Propose one pricing or packaging change based on customer value analysis — present it to leadership",
+          "Lead a win/loss analysis on the last 5 deals: why did we win, why did we lose, what would change the outcome?",
+          "Identify one cross-sell or upsell opportunity with an existing customer and develop a proposal",
+        ],
+        success_criteria: "Proactively identifies commercial opportunities. Can build a data-backed business case. Sales team views you as a commercial thinker, not just a functional specialist.",
+        timeline_weeks: 10,
+      },
+    ],
+  },
 };
 
 // ── Default fallback for dimensions not in the library ──
