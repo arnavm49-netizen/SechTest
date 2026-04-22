@@ -102,6 +102,24 @@ enum MeasurementFrequency {
   ANNUAL
 }
 
+enum AssessmentPurpose {
+  HIRING
+  DEVELOPMENT
+  SUCCESSION
+}
+
+enum NineBoxPlacement {
+  HIGH_PERFORMANCE_HIGH_POTENTIAL
+  HIGH_PERFORMANCE_MODERATE_POTENTIAL
+  HIGH_PERFORMANCE_LOW_POTENTIAL
+  MODERATE_PERFORMANCE_HIGH_POTENTIAL
+  MODERATE_PERFORMANCE_MODERATE_POTENTIAL
+  MODERATE_PERFORMANCE_LOW_POTENTIAL
+  LOW_PERFORMANCE_HIGH_POTENTIAL
+  LOW_PERFORMANCE_MODERATE_POTENTIAL
+  LOW_PERFORMANCE_LOW_POTENTIAL
+}
+
 enum CampaignStatus {
   DRAFT
   ACTIVE
@@ -557,6 +575,9 @@ model RoleFitResult {
   top_3_drivers     Json?
   top_2_constraints Json?
   recommendation    RoleFitRecommendation
+  performance_pct   Float?
+  potential_pct     Float?
+  nine_box          NineBoxPlacement?
   assessment        Assessment            @relation(fields: [assessment_id], references: [id], onDelete: Cascade)
   role_family       RoleFamily            @relation(fields: [role_family_id], references: [id])
   created_at        DateTime              @default(now())
@@ -568,20 +589,47 @@ model RoleFitResult {
 }
 
 model DevelopmentPlan {
-  id                  String                @id @default(cuid())
+  id                  String                  @id @default(cuid())
   assessment_id       String
   user_id             String
   gap_dimensions      Json
-  status              DevelopmentPlanStatus @default(DRAFT)
+  plan_summary        String?                 @db.Text
+  interventions       DevelopmentIntervention[]
+  status              DevelopmentPlanStatus    @default(DRAFT)
   manager_reviewed_at DateTime?
-  assessment          Assessment            @relation(fields: [assessment_id], references: [id], onDelete: Cascade)
-  user                User                  @relation(fields: [user_id], references: [id])
-  created_at          DateTime              @default(now())
-  updated_at          DateTime              @updatedAt
+  target_review_date  DateTime?
+  assessment          Assessment               @relation(fields: [assessment_id], references: [id], onDelete: Cascade)
+  user                User                     @relation(fields: [user_id], references: [id])
+  created_at          DateTime                 @default(now())
+  updated_at          DateTime                 @updatedAt
   deleted_at          DateTime?
 
   @@index([user_id, assessment_id])
   @@map("development_plans")
+}
+
+model DevelopmentIntervention {
+  id                   String                @id @default(cuid())
+  development_plan_id  String
+  sub_dimension_name   String
+  gap_score            Float?
+  target_score         Float?
+  intervention_type    String
+  title                String
+  description          String                @db.Text
+  actions              Json
+  success_criteria     String?               @db.Text
+  timeline_weeks       Int?
+  priority             Int                   @default(1)
+  status               String                @default("NOT_STARTED")
+  completed_at         DateTime?
+  development_plan     DevelopmentPlan        @relation(fields: [development_plan_id], references: [id], onDelete: Cascade)
+  created_at           DateTime              @default(now())
+  updated_at           DateTime              @updatedAt
+  deleted_at           DateTime?
+
+  @@index([development_plan_id, priority])
+  @@map("development_interventions")
 }
 
 model RaterAssignment {
@@ -611,6 +659,7 @@ model RaterResponse {
   item_id               String
   response_value        Json?
   response_time_seconds Int?
+  narrative_comment     String?         @db.Text
   rater_assignment      RaterAssignment @relation(fields: [rater_assignment_id], references: [id], onDelete: Cascade)
   item                  Item            @relation(fields: [item_id], references: [id])
   created_at            DateTime        @default(now())
@@ -919,6 +968,7 @@ model Campaign {
   name                  String
   assessment_version_id String
   role_family_id        String
+  purpose               AssessmentPurpose @default(HIRING)
   status                CampaignStatus    @default(DRAFT)
   invite_template       String            @db.Text
   reminder_template     String            @db.Text

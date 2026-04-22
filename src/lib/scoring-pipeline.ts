@@ -444,6 +444,24 @@ export async function execute_scoring_pipeline(input: {
       });
     }
 
+    // ── 9-box computation: performance × potential ──
+    const performance_layers = ["COGNITIVE", "EXECUTION", "SJT"];
+    const potential_layers = ["PERSONALITY", "LEADERSHIP", "MOTIVATORS"];
+
+    const perf_scores = layer_scores.filter((s) => performance_layers.includes(s.layer_code));
+    const pot_scores = layer_scores.filter((s) => potential_layers.includes(s.layer_code));
+
+    const performance_pct = perf_scores.length
+      ? perf_scores.reduce((sum, s) => sum + s.normalized_score_0_100, 0) / perf_scores.length
+      : role_fit.fit_score_pct;
+    const potential_pct = pot_scores.length
+      ? pot_scores.reduce((sum, s) => sum + s.normalized_score_0_100, 0) / pot_scores.length
+      : role_fit.fit_score_pct;
+
+    const perf_band = performance_pct >= 67 ? "HIGH" : performance_pct >= 33 ? "MODERATE" : "LOW";
+    const pot_band = potential_pct >= 67 ? "HIGH" : potential_pct >= 33 ? "MODERATE" : "LOW";
+    const nine_box = `${perf_band}_PERFORMANCE_${pot_band}_POTENTIAL` as import("@prisma/client").NineBoxPlacement;
+
     await transaction.roleFitResult.upsert({
       where: {
         assessment_id_role_family_id: {
@@ -458,12 +476,18 @@ export async function execute_scoring_pipeline(input: {
         role_family_id: assessment.role_family_id,
         top_2_constraints: to_nullable_json_input(role_fit.top_2_constraints),
         top_3_drivers: to_nullable_json_input(role_fit.top_3_drivers),
+        performance_pct: Math.round(performance_pct * 10) / 10,
+        potential_pct: Math.round(potential_pct * 10) / 10,
+        nine_box,
       },
       update: {
         fit_score_pct: role_fit.fit_score_pct,
         recommendation: role_fit.recommendation,
         top_2_constraints: to_nullable_json_input(role_fit.top_2_constraints),
         top_3_drivers: to_nullable_json_input(role_fit.top_3_drivers),
+        performance_pct: Math.round(performance_pct * 10) / 10,
+        potential_pct: Math.round(potential_pct * 10) / 10,
+        nine_box,
       },
     });
 

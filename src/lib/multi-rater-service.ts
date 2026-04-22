@@ -33,6 +33,12 @@ export const multi_rater_calibration_schema = z.object({
 export const rater_submission_schema = z.object({
   assignment_id: z.string().min(1),
   mark_completed: z.boolean().default(true),
+  narrative_comments: z.array(
+    z.object({
+      item_id: z.string().min(1),
+      comment: z.string().max(2000),
+    }),
+  ).optional(),
   responses: z
     .array(
       z.object({
@@ -347,12 +353,15 @@ export async function submit_rater_responses(input: z.infer<typeof rater_submiss
       },
     });
 
+    const narrative = input.narrative_comments?.find((c) => c.item_id === response.item_id);
+
     if (existing) {
       await prisma.raterResponse.update({
         where: { id: existing.id },
         data: {
           response_time_seconds: response.response_time_seconds,
           response_value: response.response_value,
+          ...(narrative ? { narrative_comment: narrative.comment } : {}),
         },
       });
     } else {
@@ -362,6 +371,7 @@ export async function submit_rater_responses(input: z.infer<typeof rater_submiss
           rater_assignment_id: assignment.id,
           response_time_seconds: response.response_time_seconds,
           response_value: response.response_value,
+          ...(narrative ? { narrative_comment: narrative.comment } : {}),
         },
       });
     }

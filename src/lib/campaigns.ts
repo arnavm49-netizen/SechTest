@@ -1,4 +1,4 @@
-import { CampaignInviteStatus, CampaignStatus, Prisma, UserRole } from "@prisma/client";
+import { AssessmentPurpose, CampaignInviteStatus, CampaignStatus, Prisma, UserRole } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import type { CampaignDto, CampaignSettings } from "@/lib/campaign-types";
@@ -18,6 +18,7 @@ export const campaign_create_schema = z.object({
   deadline: z.string().nullable().optional(),
   invite_template: z.string().min(10),
   name: z.string().min(3).max(120),
+  purpose: z.nativeEnum(AssessmentPurpose).default("HIRING"),
   reminder_template: z.string().min(10),
   role_family_id: z.string().min(1),
   settings: campaign_settings_schema.optional(),
@@ -81,6 +82,7 @@ export async function create_campaign(input: {
       invite_template: input.data.invite_template,
       name: input.data.name,
       org_id: input.org_id,
+      purpose: input.data.purpose,
       reminder_template: input.data.reminder_template,
       role_family_id: input.data.role_family_id,
       settings: normalize_campaign_settings(input.data.settings) as Prisma.InputJsonValue,

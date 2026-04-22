@@ -13,6 +13,11 @@ export async function GET(request: NextRequest, context: RouteContext) {
     return NextResponse.json({ message: "Authentication required." }, { status: 401 });
   }
 
+  const hr_roles = new Set(["SUPER_ADMIN", "HR_ADMIN"]);
+  if (!hr_roles.has(user.role)) {
+    return NextResponse.json({ message: "Full individual reports are only accessible to HR administrators." }, { status: 403 });
+  }
+
   try {
     const { assessment_id } = await context.params;
     const asset = await export_report_asset({
