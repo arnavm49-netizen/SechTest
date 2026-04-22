@@ -164,10 +164,20 @@ export function get_primary_navigation(role: UserRole): NavItem[] {
     },
   ];
 
+  const help: NavItem[] = [
+    {
+      href: "/guide",
+      label: "How to Use",
+      description: "Step-by-step guide for using the assessment platform.",
+      roles: ["SUPER_ADMIN", "HR_ADMIN", "MANAGER", "CANDIDATE", "RATER", "ASSESSOR"],
+    },
+  ];
+
   return [
     ...base.filter((item) => item.roles.includes(role)),
     ...get_admin_tabs_for_role(role),
     ...TEAM_TABS.filter((item) => item.roles.includes(role)),
     ...ASSESSOR_TABS.filter((item) => item.roles.includes(role)),
+    ...help.filter((item) => item.roles.includes(role)),
   ];
 }
