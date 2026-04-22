@@ -29,9 +29,55 @@ export async function POST(_request: NextRequest, context: RouteContext) {
             org_id: assessment.org_id,
           });
           scoring_status = "success";
+
+          // Auto-generate report record for the individual report template
+          try {
+            const individual_template = await prisma.reportTemplate.findFirst({
+              where: {
+                org_id: assessment.org_id,
+                report_type: "INDIVIDUAL",
+                is_active: true,
+                deleted_at: null,
+              },
+            });
+
+            if (individual_template) {
+              await prisma.generatedReport.create({
+                data: {
+                  assessment_id: session.assessment.id,
+                  report_template_id: individual_template.id,
+                  file_url: `/api/reports/individual/${session.assessment.id}/pdf`,
+                },
+              });
+            }
+
+            // Also create candidate feedback report record
+            const feedback_template = await prisma.reportTemplate.findFirst({
+              where: {
+                org_id: assessment.org_id,
+                report_type: "CANDIDATE_FEEDBACK",
+                is_active: true,
+                deleted_at: null,
+              },
+            });
+
+            if (feedback_template) {
+              await prisma.generatedReport.create({
+                data: {
+                  assessment_id: session.assessment.id,
+                  report_template_id: feedback_template.id,
+                  file_url: `/api/reports/candidate-feedback/${session.assessment.id}/pdf`,
+                },
+              });
+            }
+          } catch {
+            // Report record creation is non-critical — don't fail the completion
+          }
         } catch (error) {
           scoring_status = "failed";
-          console.error("Automatic scoring failed after assessment completion", error);
+          if (process.env.NODE_ENV === "development") {
+            console.error("Automatic scoring failed after assessment completion", error);
+          }
 
           const existing_flags = (typeof assessment.quality_flags === "object" && assessment.quality_flags !== null)
             ? assessment.quality_flags as Record<string, unknown>

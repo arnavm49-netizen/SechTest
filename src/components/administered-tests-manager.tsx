@@ -82,6 +82,21 @@ export function AdministeredTestsManager({
     });
   }
 
+  function refresh_tests() {
+    start_transition(async () => {
+      try {
+        const r = await fetch("/api/admin/administered-tests", { credentials: "include" });
+        const p = await r.json();
+        if (r.ok && p.administered_tests) {
+          set_administered_tests(p.administered_tests);
+          set_message("Results refreshed.");
+        }
+      } catch {
+        set_message("Unable to refresh.");
+      }
+    });
+  }
+
   async function copy_link(link: string) {
     try {
       await navigator.clipboard.writeText(link);
@@ -242,10 +257,17 @@ export function AdministeredTestsManager({
 
         <Card>
           <CardHeader>
-            <CardTitle>Result tracking</CardTitle>
-            <CardDescription>
-              Share the link, let the candidate complete the test, and the session status will update inside the same platform data model.
-            </CardDescription>
+            <div className="flex items-start justify-between">
+              <div>
+                <CardTitle>Result tracking</CardTitle>
+                <CardDescription>
+                  Share the link, let the candidate complete the test, then refresh to see results.
+                </CardDescription>
+              </div>
+              <Button disabled={is_pending} onClick={refresh_tests} variant="outline" size="sm">
+                {is_pending ? "Refreshing..." : "Refresh"}
+              </Button>
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
             {administered_tests.length ? (
@@ -269,27 +291,40 @@ export function AdministeredTestsManager({
                     </div>
                   </div>
                   <div className="mt-3 flex flex-wrap gap-2">
-                    <Button onClick={() => copy_link(entry.assessment_link)} type="button" variant="outline">
-                      Copy link
-                    </Button>
-                    <a
-                      className="inline-flex items-center justify-center rounded-full border border-brand-black bg-brand-white px-4 py-2 text-sm font-semibold text-brand-black transition hover:border-brand-red hover:text-brand-red"
-                      href={entry.assessment_link}
-                      rel="noreferrer"
-                      target="_blank"
-                    >
-                      Open link
-                    </a>
-                    {entry.assessment_id ? (
-                      <a
-                        className="inline-flex items-center justify-center rounded-full border border-brand-black bg-brand-white px-4 py-2 text-sm font-semibold text-brand-black transition hover:border-brand-red hover:text-brand-red"
-                        href={`/api/reports/individual/${entry.assessment_id}/pdf`}
-                        rel="noreferrer"
-                        target="_blank"
-                      >
-                        Internal report
-                      </a>
-                    ) : null}
+                    {entry.status === "COMPLETED" && entry.assessment_id ? (
+                      <>
+                        <a
+                          className="inline-flex h-10 items-center justify-center rounded-xl bg-brand-black px-5 text-sm font-medium text-brand-white transition-colors hover:bg-brand-black/85"
+                          href={`/api/reports/individual/${entry.assessment_id}/pdf`}
+                          rel="noreferrer"
+                          target="_blank"
+                        >
+                          Download full report (PDF)
+                        </a>
+                        <a
+                          className="inline-flex h-10 items-center justify-center rounded-xl border border-brand-black/[0.12] bg-brand-white px-5 text-sm font-medium text-brand-black transition-colors hover:bg-brand-grey"
+                          href={`/api/reports/candidate-feedback/${entry.assessment_id}/pdf`}
+                          rel="noreferrer"
+                          target="_blank"
+                        >
+                          Candidate feedback (PDF)
+                        </a>
+                      </>
+                    ) : (
+                      <>
+                        <Button onClick={() => copy_link(entry.assessment_link)} type="button" variant="outline" size="sm">
+                          Copy link
+                        </Button>
+                        <a
+                          className="inline-flex h-8 items-center justify-center rounded-lg border border-brand-black/[0.12] bg-brand-white px-3 text-[13px] font-medium text-brand-black transition-colors hover:bg-brand-grey"
+                          href={entry.assessment_link}
+                          rel="noreferrer"
+                          target="_blank"
+                        >
+                          Open link
+                        </a>
+                      </>
+                    )}
                   </div>
                   {entry.assessment_id ? (
                     <p className="mt-3 overflow-x-auto whitespace-nowrap text-sm text-brand-black/62">Assessment record: {entry.assessment_id}</p>
