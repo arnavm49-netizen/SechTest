@@ -25,13 +25,13 @@ export function AppShell({ children, user }: { children: React.ReactNode; user: 
 
   return (
     <div className="min-h-screen bg-brand-grey text-brand-black">
-      <div className="mx-auto flex min-h-screen max-w-[1440px] flex-col lg:flex-row">
+      <div className="mx-auto flex min-h-screen max-w-[1600px] flex-col xl:flex-row">
 
         {/* ── Sidebar ── */}
-        <aside className="flex w-full flex-col bg-brand-white/80 backdrop-blur-xl lg:sticky lg:top-0 lg:h-screen lg:w-[260px] lg:border-r lg:border-brand-black/[0.06]">
+        <aside className="flex w-full flex-col bg-brand-white/80 backdrop-blur-xl xl:sticky xl:top-0 xl:h-screen xl:w-[260px] xl:border-r xl:border-brand-black/[0.06]">
 
           {/* Brand */}
-          <div className="px-5 pt-6 pb-4 lg:px-6 lg:pt-8">
+          <div className="px-5 pt-6 pb-4 xl:px-6 xl:pt-8">
             <div className="flex items-center gap-2.5">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-red">
                 <span className="text-xs font-bold text-white">D&amp;H</span>
@@ -46,7 +46,7 @@ export function AppShell({ children, user }: { children: React.ReactNode; user: 
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-2 lg:px-4">
+          <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-2 xl:px-4">
             {navigation.map((item) => {
               const is_active = pathname === item.href || pathname.startsWith(`${item.href}/`);
 

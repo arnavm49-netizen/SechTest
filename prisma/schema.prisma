@@ -496,7 +496,7 @@ model AssessmentSection {
   updated_at              DateTime         @updatedAt
   deleted_at              DateTime?
 
-  @@unique([assessment_id, layer_id])
+  @@unique([assessment_id, section_order])
   @@index([assessment_id, layer_id])
   @@map("assessment_sections")
 }
