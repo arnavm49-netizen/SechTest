@@ -666,86 +666,259 @@ function build_team_heatmap_workbook(heatmap: TeamHeatmapData) {
 
 async function build_pdf_buffer(title: string, payload: CandidateFeedbackData | IndividualReportData, branding: Record<string, unknown>) {
   const pdf = await PdfDocument.create();
-  const title_font = await pdf.embedFont(StandardFonts.TimesRomanBold);
-  const body_font = await pdf.embedFont(StandardFonts.TimesRoman);
-  const accent = parse_hex_color(as_string(branding.accent_color) ?? "#ed3338");
-  const primary = parse_hex_color(as_string(branding.primary_text) ?? "#000000");
-  const page_size: [number, number] = [612, 792];
-  const margin_left = 48;
-  const margin_top = 48;
-  const margin_bottom = 48;
-  const content_width = page_size[0] - margin_left * 2;
+  const bold = await pdf.embedFont(StandardFonts.HelveticaBold);
+  const regular = await pdf.embedFont(StandardFonts.Helvetica);
+  const accent = parse_hex_color(as_string(branding.accent_color) ?? "#d4232a");
+  const dark = parse_hex_color(as_string(branding.primary_text) ?? "#0a0a0a");
+  const muted = rgb(0.45, 0.45, 0.45);
+  const light_grey = rgb(0.96, 0.96, 0.95);
+  const bar_bg = rgb(0.92, 0.92, 0.91);
+  const bar_green = rgb(0.16, 0.65, 0.38);
+  const bar_amber = rgb(0.8, 0.55, 0.1);
+  const bar_red = rgb(0.78, 0.15, 0.15);
+  const white = rgb(1, 1, 1);
+  const W = 612;
+  const H = 792;
+  const ML = 48;
+  const MR = 48;
+  const MT = 48;
+  const MB = 60;
+  const CW = W - ML - MR;
 
-  let page = pdf.addPage(page_size);
-  let y = page_size[1] - margin_top;
+  let page = pdf.addPage([W, H]);
+  let y = H - MT;
 
-  const ensure_space = (required_height: number) => {
-    if (y - required_height >= margin_bottom) {
-      return;
-    }
+  function new_page() { page = pdf.addPage([W, H]); y = H - MT; }
+  function need(h: number) { if (y - h < MB) new_page(); }
 
-    page = pdf.addPage(page_size);
-    y = page_size[1] - margin_top;
-  };
+  function text(t: string, opts?: { x?: number; size?: number; font?: typeof regular; color?: ReturnType<typeof rgb>; maxW?: number }) {
+    const s = opts?.size ?? 9;
+    const f = opts?.font ?? regular;
+    const c = opts?.color ?? dark;
+    const x = opts?.x ?? ML;
+    const mw = opts?.maxW ?? CW;
+    const lines = wrap_text(t, f, s, mw);
+    need(lines.length * (s + 3) + 4);
+    for (const ln of lines) { page.drawText(ln, { x, y, size: s, font: f, color: c }); y -= s + 3; }
+    y -= 2;
+  }
 
-  const draw_paragraph = (text: string, options?: { color?: ReturnType<typeof rgb>; font?: typeof body_font; size?: number }) => {
-    const size = options?.size ?? 10;
-    const font = options?.font ?? body_font;
-    const color = options?.color ?? primary;
-    const lines = wrap_text(text, font, size, content_width);
+  function gap(h = 10) { y -= h; }
 
-    ensure_space(lines.length * (size + 4) + 6);
+  function heading(t: string, s = 14) {
+    need(s + 20);
+    gap(6);
+    page.drawRectangle({ x: ML, y: y - 2, width: CW, height: 1, color: bar_bg });
+    y -= 8;
+    text(t, { size: s, font: bold });
+    gap(4);
+  }
 
-    for (const line of lines) {
-      page.drawText(line, {
-        color,
-        font,
-        size,
-        x: margin_left,
-        y,
-      });
-      y -= size + 4;
-    }
+  function subheading(t: string) {
+    need(24);
+    text(t, { size: 10, font: bold, color: accent });
+    gap(2);
+  }
 
-    y -= 6;
-  };
+  function draw_bar(label: string, value: number | null, max = 100, x_start = ML, bar_width = CW) {
+    const v = value ?? 0;
+    const bar_h = 14;
+    const label_w = 160;
+    const actual_bar_w = bar_width - label_w - 40;
+    need(bar_h + 8);
 
-  draw_paragraph(title, { font: title_font, size: 20 });
-  draw_paragraph(payload.assessment.candidate_name, { color: accent, font: title_font, size: 12 });
+    // Label
+    page.drawText(label, { x: x_start, y: y - 2, size: 8, font: regular, color: dark });
+
+    // Background bar
+    const bx = x_start + label_w;
+    page.drawRectangle({ x: bx, y: y - 4, width: actual_bar_w, height: bar_h, color: bar_bg, borderWidth: 0 });
+
+    // Filled bar
+    const fill_w = Math.max(2, (v / max) * actual_bar_w);
+    const fill_color = v >= 67 ? bar_green : v >= 33 ? bar_amber : bar_red;
+    page.drawRectangle({ x: bx, y: y - 4, width: fill_w, height: bar_h, color: fill_color, borderWidth: 0 });
+
+    // Value text
+    const val_text = value !== null ? `${Math.round(v)}` : "n/a";
+    page.drawText(val_text, { x: bx + actual_bar_w + 6, y: y - 1, size: 8, font: bold, color: dark });
+
+    y -= bar_h + 8;
+  }
+
+  function draw_kv(label: string, value: string, x_start = ML) {
+    need(16);
+    page.drawText(label, { x: x_start, y, size: 8, font: regular, color: muted });
+    page.drawText(value, { x: x_start + 140, y, size: 8, font: bold, color: dark });
+    y -= 14;
+  }
+
+  // ══════════════════════════════════════════════════════════════
+  // COVER / HEADER
+  // ══════════════════════════════════════════════════════════════
+  page.drawRectangle({ x: 0, y: H - 100, width: W, height: 100, color: accent });
+  page.drawText("D&H SECHERON", { x: ML, y: H - 40, size: 10, font: bold, color: white });
+  page.drawText(title, { x: ML, y: H - 62, size: 20, font: bold, color: white });
+  page.drawText(`Generated ${new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}`, {
+    x: ML, y: H - 82, size: 8, font: regular, color: rgb(1, 1, 1),
+  });
+  y = H - 120;
+
+  // ══════════════════════════════════════════════════════════════
+  // CANDIDATE INFO
+  // ══════════════════════════════════════════════════════════════
+  heading("Candidate Information", 12);
+  draw_kv("Name", payload.assessment.candidate_name);
+  draw_kv("Role family", payload.assessment.role_family_name);
 
   if (is_candidate_feedback_payload(payload)) {
-    draw_paragraph(`Overall fit indicator: ${payload.feedback_indicator}`, { font: title_font, size: 12 });
-    draw_paragraph("Strength areas", { font: title_font, size: 12 });
-    for (const entry of payload.strengths) {
-      draw_paragraph(`- ${entry.label}`);
-    }
-    draw_paragraph("Development areas", { font: title_font, size: 12 });
-    for (const entry of payload.development_areas) {
-      draw_paragraph(`- ${entry.sub_dimension_name}`);
-    }
-  } else {
-    if (payload.fit.fit_score_pct !== null) {
-      draw_paragraph(`Role fit score: ${payload.fit.fit_score_pct}%`, { font: title_font, size: 12 });
-    }
-    draw_paragraph(`Recommendation: ${payload.fit.recommendation ?? "Pending"}`);
-    draw_paragraph("Layer summary", { font: title_font, size: 12 });
-    for (const score of payload.layer_scores) {
-      draw_paragraph(`${score.label}: ${score.score_0_100} / 100`);
+    // ── CANDIDATE FEEDBACK REPORT ──
+    draw_kv("Fit indicator", payload.feedback_indicator);
+    gap(6);
+
+    heading("Your Strengths");
+    if (payload.strengths.length) {
+      for (const s of payload.strengths) {
+        text(`   ${s.label}`, { size: 9 });
+      }
+    } else {
+      text("   No strength data available yet.", { color: muted });
     }
 
-    if (payload.fit.top_drivers.length) {
-      draw_paragraph("Top drivers", { font: title_font, size: 12 });
-      for (const driver of payload.fit.top_drivers) {
-        draw_paragraph(`- ${driver.label}: ${driver.weighted_contribution ?? "n/a"}`);
+    heading("Areas for Growth");
+    if (payload.development_areas.length) {
+      for (const d of payload.development_areas) {
+        const score_text = d.score_0_100 !== null ? ` (score: ${Math.round(d.score_0_100)}/100)` : "";
+        text(`   ${d.sub_dimension_name}${score_text}`, { size: 9 });
+        if (d.recommendation_texts?.length) {
+          for (const rec of d.recommendation_texts.slice(0, 2)) {
+            text(`      ${rec}`, { size: 8, color: muted });
+          }
+        }
+        gap(4);
       }
+    } else {
+      text("   No development areas identified.", { color: muted });
+    }
+
+    heading("What This Means");
+    text("This report provides a high-level summary of your assessment results. Your strengths indicate areas where your profile aligns well with role expectations. Growth areas are not weaknesses — they are opportunities for focused development.");
+    gap(4);
+    text("Your HR administrator has access to a more detailed report. If you have questions about your results or want to discuss a development plan, please speak with your manager or HR contact.");
+
+  } else {
+    // ── FULL INDIVIDUAL REPORT ──
+    draw_kv("Fit score", `${Math.round(payload.fit.fit_score_pct ?? 0)}%`);
+    draw_kv("Recommendation", payload.fit.recommendation ?? "Pending");
+    if (payload.fit.nine_box) {
+      draw_kv("9-Box placement", payload.fit.nine_box.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (c: string) => c.toUpperCase()));
+    }
+    if (payload.fit.performance_pct != null) {
+      draw_kv("Performance score", `${Math.round(payload.fit.performance_pct)}%`);
+    }
+    if (payload.fit.potential_pct != null) {
+      draw_kv("Potential score", `${Math.round(payload.fit.potential_pct)}%`);
+    }
+    gap(6);
+
+    // ── LAYER SCORES ──
+    heading("Assessment Layer Scores");
+    text("Scores are normalised to 0–100. Green (67+) = strong, amber (33–66) = moderate, red (<33) = development area.", { size: 8, color: muted });
+    gap(6);
+    if (payload.layer_scores.length) {
+      for (const score of payload.layer_scores) {
+        draw_bar(score.label, score.score_0_100);
+      }
+    } else {
+      text("   No layer scores available.", { color: muted });
+    }
+
+    // ── TOP STRENGTHS ──
+    heading("Key Strengths (Top Drivers)");
+    if (payload.fit.top_drivers.length) {
+      for (const driver of payload.fit.top_drivers) {
+        const contrib = driver.weighted_contribution != null ? ` — weighted contribution: ${driver.weighted_contribution}` : "";
+        text(`   ${driver.label}${contrib}`, { size: 9 });
+      }
+    } else {
+      text("   No top drivers identified.", { color: muted });
+    }
+
+    // ── DEVELOPMENT AREAS ──
+    heading("Development Priorities");
+    if (payload.fit.top_constraints.length) {
+      for (const gap_item of payload.fit.top_constraints) {
+        const gap_val = gap_item.gap_to_ideal != null ? ` — gap to ideal: ${Math.round(gap_item.gap_to_ideal)}` : "";
+        text(`   ${gap_item.label}${gap_val}`, { size: 9 });
+      }
+    } else {
+      text("   No constraints identified.", { color: muted });
     }
 
     if (payload.development_plan.length) {
-      draw_paragraph("Development priorities", { font: title_font, size: 12 });
-      for (const gap of payload.development_plan.slice(0, 4)) {
-        draw_paragraph(`- ${gap.sub_dimension_name}: ${gap.score_0_100 ?? "n/a"}`);
+      gap(4);
+      subheading("Detailed Development Areas");
+      for (const dim of payload.development_plan.slice(0, 8)) {
+        draw_bar(dim.sub_dimension_name, dim.score_0_100);
+        if (dim.recommendation_texts?.length) {
+          for (const rec of dim.recommendation_texts.slice(0, 1)) {
+            text(`      Recommendation: ${rec}`, { size: 7.5, color: muted });
+          }
+          gap(2);
+        }
       }
     }
+
+    // ── PERSONALITY VECTOR ──
+    if (payload.personality_vector?.length) {
+      heading("Personality Profile");
+      for (const trait of payload.personality_vector) {
+        draw_bar(trait.sub_dimension_name, (trait.score_0_10 / 10) * 100);
+      }
+    }
+
+    // ── MOTIVATION ──
+    if (payload.motivation_archetype?.length) {
+      heading("Motivational Profile");
+      for (const motive of payload.motivation_archetype) {
+        draw_bar(motive.archetype, motive.score_0_100);
+      }
+    }
+
+    // ── BLIND SPOTS ──
+    if (payload.blind_spot_gaps?.length) {
+      const flagged = payload.blind_spot_gaps.filter((g) => g.blind_spot_flag);
+      if (flagged.length) {
+        heading("360 Blind Spot Analysis");
+        text("Dimensions where self-assessment diverges significantly from peer/manager ratings.", { size: 8, color: muted });
+        gap(4);
+        for (const bs of flagged) {
+          text(`   ${bs.sub_dimension_name}: Self ${Math.round(bs.self_score_100)} vs Peers ${Math.round(bs.peer_average_100 ?? 0)}`, { size: 9 });
+        }
+      }
+    }
+
+    // ── BEHAVIOUR MAPS ──
+    if (payload.behaviour_maps?.length) {
+      heading("Behaviour-Outcome Links");
+      for (const bm of payload.behaviour_maps.slice(0, 6)) {
+        text(`   ${bm.sub_dimension_name}`, { size: 9, font: bold });
+        text(`      Behaviour: ${bm.behaviour_description}`, { size: 8, color: muted });
+        text(`      Outcome: ${bm.outcome_description}`, { size: 8, color: muted });
+        gap(4);
+      }
+    }
+  }
+
+  // ══════════════════════════════════════════════════════════════
+  // FOOTER ON EVERY PAGE
+  // ══════════════════════════════════════════════════════════════
+  const pages = pdf.getPages();
+  for (let i = 0; i < pages.length; i++) {
+    const p = pages[i]!;
+    p.drawText(`D&H Secheron — Confidential`, { x: ML, y: 24, size: 7, font: regular, color: muted });
+    p.drawText(`Page ${i + 1} of ${pages.length}`, { x: W - MR - 60, y: 24, size: 7, font: regular, color: muted });
+    p.drawRectangle({ x: ML, y: 38, width: CW, height: 0.5, color: bar_bg });
   }
 
   return Buffer.from(await pdf.save());
