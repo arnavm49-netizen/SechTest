@@ -454,71 +454,135 @@ export async function seed_demo_dataset(options: SeedOptions = {}) {
     });
   }
 
-  const development_recommendations = [
-    {
-      recommendation_text:
-        "Use a weekly planning ritual, define success criteria before start, and break ambiguous work into first milestones.",
-      score_range_max: 60,
-      score_range_min: 0,
-      sub_dimension_name: "Planning ability",
-      timeline: "6 weeks",
-    },
-    {
-      recommendation_text:
-        "Practice explicit decision reviews when new data arrives and separate commitment to goals from commitment to one method.",
-      score_range_max: 60,
-      score_range_min: 0,
-      sub_dimension_name: "Openness",
-      timeline: "8 weeks",
-    },
-    {
-      recommendation_text:
-        "Set stretch goals with visible checkpoints and review progress against leading indicators, not just final outcomes.",
-      score_range_max: 60,
-      score_range_min: 0,
-      sub_dimension_name: "Bias for Action",
-      timeline: "6 weeks",
-    },
-    {
-      recommendation_text:
-        "Move all commitments into a single tracking system with owners, dates, and explicit close-out criteria.",
-      score_range_max: 60,
-      score_range_min: 0,
-      sub_dimension_name: "Process discipline",
-      timeline: "4 weeks",
-    },
-    {
-      recommendation_text:
-        "Introduce done definitions, end-of-day closure reviews, and fewer parallel starts.",
-      score_range_max: 60,
-      score_range_min: 0,
-      sub_dimension_name: "Closure rate",
-      timeline: "4 weeks",
-    },
-    {
-      recommendation_text:
-        "Map stakeholders, tailor the message to each audience, and lead with the business consequence of inaction.",
-      score_range_max: 60,
-      score_range_min: 0,
-      sub_dimension_name: "Influence",
-      timeline: "8 weeks",
-    },
-    {
-      recommendation_text:
-        "Delegate outcomes, guardrails, and checkpoints, not just tasks; review quality at agreed control points.",
-      score_range_max: 60,
-      score_range_min: 0,
-      sub_dimension_name: "Delegation",
-      timeline: "6 weeks",
-    },
-    {
-      recommendation_text:
-        "Surface issues early, use specific examples, and resolve around facts, trade-offs, and next actions.",
-      score_range_max: 60,
-      score_range_min: 0,
-      sub_dimension_name: "Conflict handling",
-      timeline: "6 weeks",
-    },
+  // ── Full development recommendation library: 3 tiers × 31 sub-dimensions = 93 recommendations ──
+  const development_recommendations: Array<{
+    recommendation_text: string;
+    score_range_min: number;
+    score_range_max: number;
+    sub_dimension_name: string;
+    timeline: string;
+  }> = [
+    // ─── COGNITIVE ────────────────────────────────────────────────
+    // Logical reasoning
+    { sub_dimension_name: "Logical reasoning", score_range_min: 0, score_range_max: 30, timeline: "6 weeks", recommendation_text: "Foundation: Complete 3 logic puzzles daily starting from easy syllogisms. Practice identifying premises vs conclusions in business memos. Ask a peer to walk through their reasoning on one decision per week so you can observe structured thinking in action." },
+    { sub_dimension_name: "Logical reasoning", score_range_min: 30, score_range_max: 60, timeline: "8 weeks", recommendation_text: "Building: Solve multi-variable logic problems in business case format (2 per week). Lead one structured trade-off analysis in a team meeting weekly. Write a one-page decision memo with explicit logical steps for one decision per fortnight." },
+    { sub_dimension_name: "Logical reasoning", score_range_min: 60, score_range_max: 85, timeline: "10 weeks", recommendation_text: "Strengthening: Mentor a junior colleague on structured reasoning. Present complex multi-stakeholder analyses to leadership. Challenge assumptions in strategy discussions using formal logic frameworks." },
+
+    // Numerical reasoning
+    { sub_dimension_name: "Numerical reasoning", score_range_min: 0, score_range_max: 30, timeline: "6 weeks", recommendation_text: "Foundation: Practice 20 minutes of numerical reasoning daily for 4 weeks. Recreate 2 financial calculations from recent reports by hand. Ask finance to walk you through one monthly report and take notes on the maths behind each number." },
+    { sub_dimension_name: "Numerical reasoning", score_range_min: 30, score_range_max: 60, timeline: "8 weeks", recommendation_text: "Building: Build one data dashboard for your team using real operational metrics. Challenge one assumption per week by running the numbers independently. Present a quarterly trend analysis with commentary on drivers." },
+    { sub_dimension_name: "Numerical reasoning", score_range_min: 60, score_range_max: 85, timeline: "10 weeks", recommendation_text: "Strengthening: Create financial models for business cases. Run sensitivity analyses on key assumptions. Teach a team member how to build data-driven recommendations." },
+
+    // Verbal reasoning
+    { sub_dimension_name: "Verbal reasoning", score_range_min: 0, score_range_max: 30, timeline: "6 weeks", recommendation_text: "Foundation: Read one business article daily and write a 3-sentence summary of the main argument. Practice distinguishing facts from opinions in meeting notes. Ask a colleague to review your written communication for clarity." },
+    { sub_dimension_name: "Verbal reasoning", score_range_min: 30, score_range_max: 60, timeline: "8 weeks", recommendation_text: "Building: Draft executive summaries for complex reports (1 page max). Practice paraphrasing others' arguments before responding in meetings. Write one recommendation memo per month with clear reasoning chain." },
+    { sub_dimension_name: "Verbal reasoning", score_range_min: 60, score_range_max: 85, timeline: "10 weeks", recommendation_text: "Strengthening: Edit and improve others' written communications. Present complex arguments to senior leadership. Develop standard communication templates for your team." },
+
+    // Abstract pattern recognition
+    { sub_dimension_name: "Abstract pattern recognition", score_range_min: 0, score_range_max: 30, timeline: "6 weeks", recommendation_text: "Foundation: Practice visual pattern recognition exercises (15 minutes daily). Look for patterns in operational data — trends, cycles, outliers. When reviewing dashboards, practice identifying what changed and why." },
+    { sub_dimension_name: "Abstract pattern recognition", score_range_min: 30, score_range_max: 60, timeline: "8 weeks", recommendation_text: "Building: Analyse process flow diagrams to identify bottlenecks and inefficiencies. Practice root cause analysis using the '5 Whys' method on operational issues. Map dependencies between systems visually." },
+
+    // Learning agility
+    { sub_dimension_name: "Learning agility", score_range_min: 0, score_range_max: 30, timeline: "8 weeks", recommendation_text: "Foundation: After every new experience, write a 1-page reflection — what surprised you, what you got wrong, what you would do differently. Volunteer for one task outside your comfort zone this month. When you receive negative feedback, write down 'what is true in this feedback?' before responding." },
+    { sub_dimension_name: "Learning agility", score_range_min: 30, score_range_max: 60, timeline: "10 weeks", recommendation_text: "Building: Lead or co-lead one cross-functional project where you are not the expert. Shadow someone in a different function for a day and document 3 transferable insights. Build a personal 'learning log' — one insight per week from situations where your assumptions were wrong." },
+    { sub_dimension_name: "Learning agility", score_range_min: 60, score_range_max: 85, timeline: "12 weeks", recommendation_text: "Strengthening: Take on a stretch assignment in an unfamiliar domain (new market, new technology, new function). Mentor others on how to learn from failure. Run after-action reviews for your team after every major project." },
+
+    // ─── PERSONALITY ──────────────────────────────────────────────
+    { sub_dimension_name: "Conscientiousness", score_range_min: 0, score_range_max: 30, timeline: "6 weeks", recommendation_text: "Foundation: Set up a task management system and use it every day for 30 days. Create an end-of-day review habit — list what was completed, what rolled over, and why. Set calendar reminders for all commitments within 1 hour of making them." },
+    { sub_dimension_name: "Conscientiousness", score_range_min: 30, score_range_max: 60, timeline: "8 weeks", recommendation_text: "Building: Document your top 5 recurring processes as personal SOPs. Introduce a pre-send checklist for all reports and external communications. Track your own error rate weekly (self-audit) and aim for 50% reduction." },
+    { sub_dimension_name: "Conscientiousness", score_range_min: 60, score_range_max: 85, timeline: "10 weeks", recommendation_text: "Strengthening: Volunteer to own one process improvement initiative. Create quality standards for your team's key outputs. Build systems that make it easy for others to be reliable." },
+
+    { sub_dimension_name: "Openness", score_range_min: 0, score_range_max: 30, timeline: "8 weeks", recommendation_text: "Foundation: Practice saying 'that is interesting — tell me more' when someone proposes an unfamiliar approach. Read one article per week from outside your domain. Try one new tool, method, or approach this month and reflect on what you learned." },
+    { sub_dimension_name: "Openness", score_range_min: 30, score_range_max: 60, timeline: "8 weeks", recommendation_text: "Building: When plans change, practice separating your commitment to the goal from your commitment to the method. Attend one cross-functional meeting per month as an observer. Propose one unconventional approach to a routine problem." },
+
+    { sub_dimension_name: "Emotional Stability", score_range_min: 0, score_range_max: 30, timeline: "8 weeks", recommendation_text: "Foundation: Keep a pressure diary for 2 weeks — record triggers, reactions, and recovery time. Learn one reframing technique (e.g., 'what would I advise a friend?'). Develop a personal 3-minute reset routine for after stressful situations." },
+    { sub_dimension_name: "Emotional Stability", score_range_min: 30, score_range_max: 60, timeline: "10 weeks", recommendation_text: "Building: Practice the '10-second pause' before responding in tense conversations. Debrief with a trusted colleague after difficult interactions. Identify your top 3 stress triggers and develop a coping strategy for each." },
+
+    { sub_dimension_name: "Extraversion", score_range_min: 0, score_range_max: 30, timeline: "8 weeks", recommendation_text: "Foundation: Initiate one conversation per day with someone you don't usually interact with. Volunteer to present one item in team meetings. Practice speaking up within the first 5 minutes of a group discussion." },
+    { sub_dimension_name: "Extraversion", score_range_min: 30, score_range_max: 60, timeline: "8 weeks", recommendation_text: "Building: Lead one team meeting per week. Attend one networking event or cross-functional gathering per month. Build rapport with 2 new stakeholders by scheduling informal conversations." },
+
+    { sub_dimension_name: "Agreeableness", score_range_min: 0, score_range_max: 30, timeline: "8 weeks", recommendation_text: "Foundation: Before disagreeing, practice restating the other person's position to their satisfaction. Offer to help one colleague per week with something outside your formal responsibilities. Look for the valid point in every opposing view." },
+    { sub_dimension_name: "Agreeableness", score_range_min: 30, score_range_max: 60, timeline: "8 weeks", recommendation_text: "Building: When conflict arises, focus on finding a solution both parties can accept before pushing your own preference. Celebrate others' achievements publicly. Practice adjusting your communication style to the listener." },
+
+    { sub_dimension_name: "Risk Appetite", score_range_min: 0, score_range_max: 30, timeline: "8 weeks", recommendation_text: "Foundation: For one low-stakes decision per week, choose the less predictable option and track the outcome. Practice separating 'this is risky' from 'this is uncomfortable.' Analyse one past decision where playing it safe had a hidden cost." },
+    { sub_dimension_name: "Risk Appetite", score_range_min: 30, score_range_max: 60, timeline: "10 weeks", recommendation_text: "Building: Propose one calculated risk per month — quantify the upside, downside, and mitigation. Practice making decisions with 70% information rather than waiting for 100%. Study one bold decision a leader you admire made and the reasoning behind it." },
+
+    { sub_dimension_name: "Bias for Action", score_range_min: 0, score_range_max: 30, timeline: "6 weeks", recommendation_text: "Foundation: When you catch yourself waiting for more information, ask 'what is the cost of waiting another week?' Send first drafts rather than waiting for perfection. Set personal deadlines tighter than official ones." },
+    { sub_dimension_name: "Bias for Action", score_range_min: 30, score_range_max: 60, timeline: "8 weeks", recommendation_text: "Building: Prototype rapidly to test concepts before building full solutions. Create urgency around one slow-moving initiative. Remove one blocker for your team this week instead of escalating it." },
+
+    // ─── EXECUTION ────────────────────────────────────────────────
+    { sub_dimension_name: "Planning ability", score_range_min: 0, score_range_max: 30, timeline: "6 weeks", recommendation_text: "Foundation: Use a written project brief template for every new initiative (scope, milestones, risks, dependencies). Break every project into phases with deliverables before starting. Present your plan to a peer for feedback before execution." },
+    { sub_dimension_name: "Planning ability", score_range_min: 30, score_range_max: 60, timeline: "8 weeks", recommendation_text: "Building: Create a risk register for your biggest project. Develop contingency plans for top 3 risks. Run a pre-mortem ('what could go wrong?') before the next major initiative." },
+    { sub_dimension_name: "Planning ability", score_range_min: 60, score_range_max: 85, timeline: "10 weeks", recommendation_text: "Strengthening: Coach others on project planning. Track plan-vs-actual accuracy over 8 weeks and adjust estimation methods. Build planning templates that your team can reuse." },
+
+    { sub_dimension_name: "Prioritisation", score_range_min: 0, score_range_max: 30, timeline: "6 weeks", recommendation_text: "Foundation: Start each day by writing your top 3 priorities before opening email. Practice saying 'let me check my priorities' before accepting new commitments. Track interruptions for 1 week to identify what can be deferred or delegated." },
+    { sub_dimension_name: "Prioritisation", score_range_min: 30, score_range_max: 60, timeline: "8 weeks", recommendation_text: "Building: Have a weekly priority alignment conversation with your manager. Communicate trade-offs explicitly when reprioritising. Protect dedicated time blocks for strategic work." },
+    { sub_dimension_name: "Prioritisation", score_range_min: 60, score_range_max: 85, timeline: "10 weeks", recommendation_text: "Strengthening: Teach your team a prioritisation framework. Make priority decisions transparent — explain what you chose, what you deferred, and why. Build a team rhythm for regular priority reviews." },
+
+    { sub_dimension_name: "Closure rate", score_range_min: 0, score_range_max: 30, timeline: "4 weeks", recommendation_text: "Foundation: Introduce 'done definitions' for every task — what specifically needs to be true for this to be finished? Create end-of-day reviews. Reduce the number of tasks you start in parallel." },
+    { sub_dimension_name: "Closure rate", score_range_min: 30, score_range_max: 60, timeline: "6 weeks", recommendation_text: "Building: Follow up on delegated work until confirmed complete. Track open items in a shared system. Document lessons learned after completing each project." },
+    { sub_dimension_name: "Closure rate", score_range_min: 60, score_range_max: 85, timeline: "8 weeks", recommendation_text: "Strengthening: Build a team culture of clean close-outs. Create handover checklists. Ensure no task moves to 'done' without stakeholder confirmation." },
+
+    { sub_dimension_name: "Process discipline", score_range_min: 0, score_range_max: 30, timeline: "4 weeks", recommendation_text: "Foundation: Move all commitments into a single tracking system. Follow checklists for complex procedures. Report process deviations even when nobody notices." },
+    { sub_dimension_name: "Process discipline", score_range_min: 30, score_range_max: 60, timeline: "6 weeks", recommendation_text: "Building: Document your recurring processes as SOPs. Automate repeatable tasks where possible. Escalate process breaks instead of working around them silently." },
+    { sub_dimension_name: "Process discipline", score_range_min: 60, score_range_max: 85, timeline: "8 weeks", recommendation_text: "Strengthening: Own a process improvement initiative. Establish quality gates for your team. Build evidence trails for key operational decisions." },
+
+    { sub_dimension_name: "Attention to detail", score_range_min: 0, score_range_max: 30, timeline: "4 weeks", recommendation_text: "Foundation: Proofread every report and email before sending. Verify data accuracy by cross-referencing sources. Use a checklist for high-stakes deliverables." },
+    { sub_dimension_name: "Attention to detail", score_range_min: 30, score_range_max: 60, timeline: "6 weeks", recommendation_text: "Building: Compare source data to summary data before sharing reports. Build a personal quality checklist for your key outputs. Double-check calculations and references before sending them onward." },
+    { sub_dimension_name: "Attention to detail", score_range_min: 60, score_range_max: 85, timeline: "8 weeks", recommendation_text: "Strengthening: Create review standards for your team. Catch issues before they become visible. Build automated validation into your workflows." },
+
+    // ─── LEADERSHIP ───────────────────────────────────────────────
+    { sub_dimension_name: "Influence", score_range_min: 0, score_range_max: 30, timeline: "8 weeks", recommendation_text: "Foundation: Map your top 5 stakeholders — their goals, concerns, and communication preferences. Practice the 'what + so what + now what' structure in every recommendation. Prepare one 'pre-meeting alignment' conversation per week." },
+    { sub_dimension_name: "Influence", score_range_min: 30, score_range_max: 60, timeline: "10 weeks", recommendation_text: "Building: Build data-backed business cases for proposals. Tailor your message to different audiences (board vs team vs peers). Create coalitions before proposing major changes." },
+    { sub_dimension_name: "Influence", score_range_min: 60, score_range_max: 85, timeline: "12 weeks", recommendation_text: "Strengthening: Mentor others on stakeholder management. Lead cross-functional alignment on strategic initiatives. Develop your executive presence through structured feedback from senior leaders." },
+
+    { sub_dimension_name: "Conflict handling", score_range_min: 0, score_range_max: 30, timeline: "8 weeks", recommendation_text: "Foundation: Practice 'describe behaviour, explain impact, request change' on one small disagreement per week. Pause and ask a genuine question when tension rises. Debrief every significant disagreement within 24 hours." },
+    { sub_dimension_name: "Conflict handling", score_range_min: 30, score_range_max: 60, timeline: "10 weeks", recommendation_text: "Building: Address issues directly without escalating emotion. Facilitate structured mediation between conflicting parties. Focus on resolving around facts and trade-offs, not positions." },
+    { sub_dimension_name: "Conflict handling", score_range_min: 60, score_range_max: 85, timeline: "10 weeks", recommendation_text: "Strengthening: Create psychological safety so people raise concerns early. Coach others on constructive conflict. Model calm, fact-based disagreement in leadership meetings." },
+
+    { sub_dimension_name: "Feedback receptivity", score_range_min: 0, score_range_max: 30, timeline: "8 weeks", recommendation_text: "Foundation: When receiving feedback, ask 'can you give me a specific example?' Take notes and thank the giver. Create a personal improvement plan based on the most common theme in feedback you have received." },
+    { sub_dimension_name: "Feedback receptivity", score_range_min: 30, score_range_max: 60, timeline: "8 weeks", recommendation_text: "Building: Proactively seek feedback from 2 different stakeholders monthly. Implement one visible change based on feedback and share what you changed and why. Make it easy for others to challenge your assumptions." },
+
+    { sub_dimension_name: "Delegation", score_range_min: 0, score_range_max: 30, timeline: "8 weeks", recommendation_text: "Foundation: Identify 3 tasks you do that someone else could own — delegate one per week. For each: clarify the outcome, authority level, checkpoints, and timeline. Check in only at agreed checkpoints." },
+    { sub_dimension_name: "Delegation", score_range_min: 30, score_range_max: 60, timeline: "8 weeks", recommendation_text: "Building: Match tasks to team members' development needs, not just availability. Provide context, not just instructions. Resist redoing delegated work — give feedback instead." },
+    { sub_dimension_name: "Delegation", score_range_min: 60, score_range_max: 85, timeline: "10 weeks", recommendation_text: "Strengthening: Delegate outcomes and authority, not just tasks. Develop team capability through progressive ownership. Build a team that can operate effectively in your absence." },
+
+    { sub_dimension_name: "Team energy", score_range_min: 0, score_range_max: 30, timeline: "8 weeks", recommendation_text: "Foundation: Recognise one team member's contribution publicly each week. Celebrate small wins. Shield the team from unnecessary pressure by filtering information appropriately." },
+    { sub_dimension_name: "Team energy", score_range_min: 30, score_range_max: 60, timeline: "8 weeks", recommendation_text: "Building: Maintain enthusiasm during difficult phases. Help the team recover quickly after setbacks. Bring optimism to meetings without hiding risks." },
+
+    { sub_dimension_name: "Strategic thinking", score_range_min: 0, score_range_max: 30, timeline: "10 weeks", recommendation_text: "Foundation: Read your company's annual report and identify 3 strategic priorities. Before every major decision, write one sentence: 'How does this affect our position 2 years from now?' Attend one industry event per quarter and summarise trends for your team." },
+    { sub_dimension_name: "Strategic thinking", score_range_min: 30, score_range_max: 60, timeline: "12 weeks", recommendation_text: "Building: Build a competitive landscape map for your area. Present a strategic recommendation to leadership based on data. Identify one 'weak signal' in your industry and develop a position on what the company should do." },
+    { sub_dimension_name: "Strategic thinking", score_range_min: 60, score_range_max: 85, timeline: "12 weeks", recommendation_text: "Strengthening: Run scenario planning exercises. Lead strategic planning for your function. Coach others on connecting operational decisions to long-term positioning." },
+
+    { sub_dimension_name: "Change leadership", score_range_min: 0, score_range_max: 30, timeline: "10 weeks", recommendation_text: "Foundation: Before your next change initiative, map stakeholders into champions, supporters, fence-sitters, and resistors. Practice 'acknowledge what people are losing before explaining what they gain.' Celebrate one visible early win within 3 weeks." },
+    { sub_dimension_name: "Change leadership", score_range_min: 30, score_range_max: 60, timeline: "12 weeks", recommendation_text: "Building: Lead a cross-functional change initiative end-to-end. Build a change communication plan. Conduct a retrospective 90 days after a change to check what stuck and what reverted." },
+    { sub_dimension_name: "Change leadership", score_range_min: 60, score_range_max: 85, timeline: "12 weeks", recommendation_text: "Strengthening: Scale change methodology across teams. Coach other managers through their own change initiatives. Build an organisational muscle for continuous transformation." },
+
+    // ─── MOTIVATORS ───────────────────────────────────────────────
+    { sub_dimension_name: "Financial vs Mastery vs Purpose", score_range_min: 0, score_range_max: 40, timeline: "Ongoing", recommendation_text: "Discuss motivational alignment with your manager. If your primary motivator is financial, explore performance-linked incentive structures. If mastery-driven, negotiate access to skill-building opportunities. If purpose-driven, connect your daily work to the organisation's mission explicitly." },
+    { sub_dimension_name: "Stability vs Growth", score_range_min: 0, score_range_max: 40, timeline: "Ongoing", recommendation_text: "Understand your tolerance for change. If stability-oriented, build predictable routines within your role. If growth-oriented, actively seek stretch assignments and career conversations with your manager." },
+    { sub_dimension_name: "Autonomy vs Structure", score_range_min: 0, score_range_max: 40, timeline: "Ongoing", recommendation_text: "Know your preferred operating mode. If you value autonomy, propose how you would like to be managed (goals + check-ins, not daily oversight). If you thrive on structure, ask your manager for clear expectations and defined processes." },
+    { sub_dimension_name: "Power vs Collaboration", score_range_min: 0, score_range_max: 40, timeline: "Ongoing", recommendation_text: "Reflect on whether you energise through influence or through partnership. If power-driven, channel it into visible ownership with accountability. If collaboration-driven, take on facilitation roles that leverage your strength." },
+
+    // ─── SJT ──────────────────────────────────────────────────────
+    { sub_dimension_name: "Problem framing", score_range_min: 0, score_range_max: 30, timeline: "8 weeks", recommendation_text: "Foundation: Before solving any problem, write a 2-sentence problem statement. Ask 'what is the real problem here — not just the symptom?' Practice the '5 Whys' technique on operational issues." },
+    { sub_dimension_name: "Problem framing", score_range_min: 30, score_range_max: 60, timeline: "10 weeks", recommendation_text: "Building: Reframe problems as opportunities in team discussions. Distinguish between problems you can control, influence, or only accept. Present problem analyses to leadership with multiple solution options." },
+
+    { sub_dimension_name: "Stakeholder trade-off navigation", score_range_min: 0, score_range_max: 30, timeline: "8 weeks", recommendation_text: "Foundation: Write a one-page trade-off analysis before every multi-stakeholder decision. Identify the 'hidden stakeholder' — who is affected but not in the room? Practice transparent trade-off conversations." },
+    { sub_dimension_name: "Stakeholder trade-off navigation", score_range_min: 30, score_range_max: 60, timeline: "10 weeks", recommendation_text: "Building: Build stakeholder alignment before group meetings. Quantify trade-offs in commercial terms (revenue, cost, risk). Communicate decisions with clear rationale even to those who disagree." },
+
+    { sub_dimension_name: "Resource constraint decisions", score_range_min: 0, score_range_max: 30, timeline: "8 weeks", recommendation_text: "Foundation: When resources are tight, list all options and rank by ROI before deciding. Practice asking 'what would I stop doing to make room for this?' Present resource trade-offs to your manager with data." },
+    { sub_dimension_name: "Resource constraint decisions", score_range_min: 30, score_range_max: 60, timeline: "10 weeks", recommendation_text: "Building: Build phased approaches that reduce risk when resources are limited. Identify creative resource solutions (partnerships, shared capacity, phased investment). Advocate for resource allocation based on strategic priority, not politics." },
+
+    { sub_dimension_name: "Escalation judgment", score_range_min: 0, score_range_max: 30, timeline: "6 weeks", recommendation_text: "Foundation: Ask yourself 3 questions before escalating: Can I resolve this at my level? Is it time-sensitive? What will I recommend when I escalate? Always escalate with a proposed solution, not just the problem." },
+    { sub_dimension_name: "Escalation judgment", score_range_min: 30, score_range_max: 60, timeline: "8 weeks", recommendation_text: "Building: Develop judgment for when to act vs when to escalate. Report near-misses and early warning signs proactively. Build trust with leadership so escalations are welcomed, not feared." },
+
+    { sub_dimension_name: "Ethical boundary recognition", score_range_min: 0, score_range_max: 30, timeline: "8 weeks", recommendation_text: "Foundation: For every significant decision, apply the 'newspaper test' — would you be comfortable if this appeared in an article? Review your company's code of conduct and identify 3 grey areas relevant to your role. Discuss one ethical dilemma per month with a mentor." },
+    { sub_dimension_name: "Ethical boundary recognition", score_range_min: 30, score_range_max: 60, timeline: "8 weeks", recommendation_text: "Building: Proactively raise ethical concerns before they escalate. Document situations where you recognised and acted on a boundary. Build a reputation as someone who does the right thing even when it is inconvenient." },
+
+    { sub_dimension_name: "Commercial acumen", score_range_min: 0, score_range_max: 30, timeline: "8 weeks", recommendation_text: "Foundation: Spend half a day with the sales team — attend a customer call and observe. Read the P&L and identify the top 3 revenue and cost drivers. Map your top 5 customers by revenue, margin, and strategic importance." },
+    { sub_dimension_name: "Commercial acumen", score_range_min: 30, score_range_max: 60, timeline: "10 weeks", recommendation_text: "Building: Build a total-cost-of-ownership analysis for your top product. Propose one pricing or packaging change based on customer value analysis. Conduct a win/loss analysis on recent deals." },
+    { sub_dimension_name: "Commercial acumen", score_range_min: 60, score_range_max: 85, timeline: "12 weeks", recommendation_text: "Strengthening: Lead commercial strategy discussions. Train the team on value-based selling. Develop competitive intelligence processes for your function." },
   ];
 
   for (const recommendation of development_recommendations) {
