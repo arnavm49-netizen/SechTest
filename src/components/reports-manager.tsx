@@ -126,6 +126,23 @@ export function ReportsManager({ initial_snapshot }: { initial_snapshot: Reports
                       </a>
                     </div>
                   </div>
+                  {assessment.templates_generated.length ? (
+                    <ul className="mt-3 space-y-1 text-xs text-brand-black/70">
+                      {assessment.templates_generated.map((entry) => (
+                        <li key={`${entry.report_type}-${entry.generated_at}`} className="flex flex-wrap items-center gap-2">
+                          <span className="inline-flex rounded-full bg-brand-black/8 px-2 py-0.5 font-semibold text-brand-black">
+                            {entry.report_type === "CANDIDATE_FEEDBACK" ? "Candidate feedback" : entry.report_type === "INDIVIDUAL" ? "Individual report" : entry.template_name}
+                          </span>
+                          <span>{entry.template_name}</span>
+                          <span className="text-brand-black/50">· generated {new Date(entry.generated_at).toLocaleString("en-IN")}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="mt-3 text-xs text-brand-black/50">
+                      No report files recorded yet. Click PDF or Candidate PDF above to render on demand.
+                    </p>
+                  )}
                 </button>
               ))}
             </div>

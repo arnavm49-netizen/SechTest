@@ -158,6 +158,68 @@ export async function update_report_template(input: {
   };
 }
 
+const default_template_seeds: Array<{
+  branding: Record<string, unknown>;
+  distribution_rules: Record<string, unknown>;
+  name: string;
+  report_type: ReportType;
+  sections_config: unknown;
+}> = [
+  {
+    branding: {
+      accent_color: "#ed3338",
+      background_color: "#f0eeee",
+      font_family: "Century Schoolbook",
+      primary_text: "#000000",
+    },
+    distribution_rules: { audience: ["HR_ADMIN", "MANAGER"], embargo_until_publish: true },
+    name: "Individual Psychometric Summary",
+    report_type: ReportType.INDIVIDUAL,
+    sections_config: ["profile", "role_fit", "development"],
+  },
+  {
+    branding: {
+      accent_color: "#ed3338",
+      background_color: "#f0eeee",
+      font_family: "Century Schoolbook",
+      primary_text: "#000000",
+    },
+    distribution_rules: { audience: ["CANDIDATE"], simplified_feedback: true },
+    name: "Candidate Feedback",
+    report_type: ReportType.CANDIDATE_FEEDBACK,
+    sections_config: ["indicator", "strengths", "development"],
+  },
+];
+
+export async function ensure_default_report_templates(org_id: string) {
+  for (const seed of default_template_seeds) {
+    const existing = await prisma.reportTemplate.findFirst({
+      where: {
+        deleted_at: null,
+        is_active: true,
+        org_id,
+        report_type: seed.report_type,
+      },
+    });
+
+    if (existing) {
+      continue;
+    }
+
+    await prisma.reportTemplate.create({
+      data: {
+        branding: seed.branding as Prisma.InputJsonValue,
+        distribution_rules: seed.distribution_rules as Prisma.InputJsonValue,
+        is_active: true,
+        name: seed.name,
+        org_id,
+        report_type: seed.report_type,
+        sections_config: seed.sections_config as Prisma.InputJsonValue,
+      },
+    });
+  }
+}
+
 export async function build_individual_report_view(input: {
   assessment_id: string;
   viewer: ReportViewer;
