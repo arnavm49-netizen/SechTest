@@ -1,6 +1,8 @@
+import { UserRole } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { complete_assessment_from_invite } from "@/lib/assessment-runtime";
 import { prisma } from "@/lib/db";
+import { ensure_default_report_templates, export_report_asset } from "@/lib/reporting-service";
 import { run_scoring_for_assessment } from "@/lib/scoring-service";
 
 type RouteContext = {
@@ -15,11 +17,13 @@ export async function POST(_request: NextRequest, context: RouteContext) {
     const session = await complete_assessment_from_invite(token);
 
     let scoring_status: "success" | "failed" | "skipped" = "skipped";
+    let report_status: "success" | "failed" | "skipped" = "skipped";
+    let report_error: string | null = null;
 
     if (session.assessment?.id) {
       const assessment = await prisma.assessment.findUnique({
         where: { id: session.assessment.id },
-        select: { org_id: true, quality_flags: true },
+        select: { candidate_id: true, org_id: true, quality_flags: true },
       });
 
       if (assessment) {
@@ -30,48 +34,38 @@ export async function POST(_request: NextRequest, context: RouteContext) {
           });
           scoring_status = "success";
 
-          // Auto-generate report record for the individual report template
           try {
-            const individual_template = await prisma.reportTemplate.findFirst({
-              where: {
-                org_id: assessment.org_id,
-                report_type: "INDIVIDUAL",
-                is_active: true,
-                deleted_at: null,
-              },
+            await ensure_default_report_templates(assessment.org_id);
+
+            const viewer = {
+              id: assessment.candidate_id,
+              org_id: assessment.org_id,
+              role: UserRole.SUPER_ADMIN,
+            };
+
+            await export_report_asset({
+              actor_id: null,
+              assessment_id: session.assessment.id,
+              format: "pdf",
+              report_type: "INDIVIDUAL",
+              viewer,
             });
 
-            if (individual_template) {
-              await prisma.generatedReport.create({
-                data: {
-                  assessment_id: session.assessment.id,
-                  report_template_id: individual_template.id,
-                  file_url: `/api/reports/individual/${session.assessment.id}/pdf`,
-                },
-              });
-            }
-
-            // Also create candidate feedback report record
-            const feedback_template = await prisma.reportTemplate.findFirst({
-              where: {
-                org_id: assessment.org_id,
-                report_type: "CANDIDATE_FEEDBACK",
-                is_active: true,
-                deleted_at: null,
-              },
+            await export_report_asset({
+              actor_id: null,
+              assessment_id: session.assessment.id,
+              format: "pdf",
+              report_type: "CANDIDATE_FEEDBACK",
+              viewer,
             });
 
-            if (feedback_template) {
-              await prisma.generatedReport.create({
-                data: {
-                  assessment_id: session.assessment.id,
-                  report_template_id: feedback_template.id,
-                  file_url: `/api/reports/candidate-feedback/${session.assessment.id}/pdf`,
-                },
-              });
+            report_status = "success";
+          } catch (error) {
+            report_status = "failed";
+            report_error = error instanceof Error ? error.message : "Unknown report error";
+            if (process.env.NODE_ENV === "development") {
+              console.error("Report pre-generation failed after assessment completion", error);
             }
-          } catch {
-            // Report record creation is non-critical — don't fail the completion
           }
         } catch (error) {
           scoring_status = "failed";
@@ -98,7 +92,7 @@ export async function POST(_request: NextRequest, context: RouteContext) {
       }
     }
 
-    return NextResponse.json({ scoring_status, session });
+    return NextResponse.json({ scoring_status, report_status, report_error, session });
   } catch (error) {
     return NextResponse.json({ message: error instanceof Error ? error.message : "Unable to complete assessment." }, { status: 400 });
   }

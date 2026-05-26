@@ -300,6 +300,16 @@ export function CandidateAssessmentApp({
                   <span className="font-medium text-brand-black">{session.campaign.name}</span>
                 </div>
               </div>
+              {!invalidated ? (
+                <a
+                  className="mt-4 inline-flex h-10 w-full items-center justify-center rounded-xl bg-brand-black px-5 text-sm font-medium text-brand-white transition-colors hover:bg-brand-black/85"
+                  href={`/api/assessment/${token}/feedback-report/pdf`}
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  Download your feedback report (PDF)
+                </a>
+              ) : null}
             </CardContent>
           </Card>
         </div>
