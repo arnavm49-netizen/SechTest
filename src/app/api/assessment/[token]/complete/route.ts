@@ -73,19 +73,24 @@ export async function POST(_request: NextRequest, context: RouteContext) {
             console.error("Automatic scoring failed after assessment completion", error);
           }
 
-          const existing_flags = (typeof assessment.quality_flags === "object" && assessment.quality_flags !== null)
-            ? assessment.quality_flags as Record<string, unknown>
-            : {};
+          const existing_flags = Array.isArray(assessment.quality_flags)
+            ? (assessment.quality_flags as Array<Record<string, unknown>>).filter(
+                (entry) => entry && typeof entry === "object" && entry.scoring_failed !== true,
+              )
+            : [];
 
           await prisma.assessment.update({
             where: { id: session.assessment.id },
             data: {
-              quality_flags: {
+              quality_flags: [
                 ...existing_flags,
-                scoring_failed: true,
-                scoring_error: error instanceof Error ? error.message : "Unknown scoring error",
-                scoring_failed_at: new Date().toISOString(),
-              },
+                {
+                  scoring_failed: true,
+                  scoring_error: error instanceof Error ? error.message : "Unknown scoring error",
+                  scoring_failed_at: new Date().toISOString(),
+                  reason: "scoring_failed",
+                },
+              ],
             },
           });
         }

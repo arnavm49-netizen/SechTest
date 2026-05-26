@@ -230,8 +230,12 @@ export type ReportsSnapshot = {
     latest_fit_score_pct: number | null;
     latest_recommendation: string | null;
     latest_run_model_label: string | null;
+    latest_run_status: string | null;
     manager_name: string | null;
     role_family_name: string;
+    scoring_status: "scored" | "failed" | "pending";
+    scoring_error: string | null;
+    scoring_failed_at: string | null;
     templates_generated: Array<{
       generated_at: string;
       report_type: string;

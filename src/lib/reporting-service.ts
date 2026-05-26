@@ -94,21 +94,35 @@ export async function get_reports_admin_snapshot(org_id: string) {
 
   return {
     managers,
-    recent_assessments: completed_assessments.map((assessment) => ({
-      assessment_id: assessment.id,
-      candidate_name: assessment.candidate.name,
-      completed_at: assessment.completed_at?.toISOString() ?? null,
-      latest_fit_score_pct: assessment.role_fit_results[0]?.fit_score_pct ?? null,
-      latest_recommendation: assessment.role_fit_results[0]?.recommendation ?? null,
-      latest_run_model_label: assessment.scoring_runs[0]?.scoring_model.version_label ?? null,
-      manager_name: assessment.candidate.manager?.name ?? null,
-      role_family_name: assessment.role_family.name,
-      templates_generated: assessment.generated_reports.map((report) => ({
-        generated_at: report.generated_at.toISOString(),
-        report_type: report.report_template.report_type,
-        template_name: report.report_template.name,
-      })),
-    })),
+    recent_assessments: completed_assessments.map((assessment) => {
+      const failure = read_scoring_failure(assessment.quality_flags);
+      const latest_run = assessment.scoring_runs[0] ?? null;
+      const scoring_status: "scored" | "failed" | "pending" = assessment.role_fit_results[0]
+        ? "scored"
+        : failure
+          ? "failed"
+          : "pending";
+
+      return {
+        assessment_id: assessment.id,
+        candidate_name: assessment.candidate.name,
+        completed_at: assessment.completed_at?.toISOString() ?? null,
+        latest_fit_score_pct: assessment.role_fit_results[0]?.fit_score_pct ?? null,
+        latest_recommendation: assessment.role_fit_results[0]?.recommendation ?? null,
+        latest_run_model_label: latest_run?.scoring_model.version_label ?? null,
+        latest_run_status: latest_run?.status ?? null,
+        manager_name: assessment.candidate.manager?.name ?? null,
+        role_family_name: assessment.role_family.name,
+        scoring_status,
+        scoring_error: failure?.message ?? null,
+        scoring_failed_at: failure?.failed_at ?? null,
+        templates_generated: assessment.generated_reports.map((report) => ({
+          generated_at: report.generated_at.toISOString(),
+          report_type: report.report_template.report_type,
+          template_name: report.report_template.name,
+        })),
+      };
+    }),
     templates: templates.map((template) => ({
       branding: as_record(template.branding) ?? {},
       distribution_rules: as_record(template.distribution_rules) ?? {},
@@ -1028,6 +1042,36 @@ function simplify_recommendation(recommendation: string | null) {
     default:
       return "Assessment complete";
   }
+}
+
+function read_scoring_failure(quality_flags: unknown): { failed_at: string | null; message: string } | null {
+  const candidates: unknown[] = [];
+
+  if (Array.isArray(quality_flags)) {
+    candidates.push(...quality_flags);
+  } else if (quality_flags && typeof quality_flags === "object") {
+    candidates.push(quality_flags);
+  }
+
+  for (const candidate of candidates) {
+    if (!candidate || typeof candidate !== "object") {
+      continue;
+    }
+    const record = candidate as Record<string, unknown>;
+    if (record.scoring_failed !== true && record.reason !== "scoring_failed") {
+      continue;
+    }
+    const message =
+      typeof record.scoring_error === "string"
+        ? record.scoring_error
+        : typeof record.message === "string"
+          ? record.message
+          : "Scoring failed without a recorded error message.";
+    const failed_at = typeof record.scoring_failed_at === "string" ? record.scoring_failed_at : null;
+    return { failed_at, message };
+  }
+
+  return null;
 }
 
 function to_json_input(value: unknown): Prisma.InputJsonValue | Prisma.JsonNullValueInput {

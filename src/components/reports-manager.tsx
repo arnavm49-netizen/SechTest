@@ -70,6 +70,24 @@ export function ReportsManager({ initial_snapshot }: { initial_snapshot: Reports
     }
   }
 
+  async function handle_rescore(assessment_id: string) {
+    set_message("Re-scoring assessment...");
+    const response = await fetch(`/api/admin/reports/${assessment_id}/rescore`, {
+      credentials: "include",
+      method: "POST",
+    });
+    const payload = await response.json().catch(() => ({}));
+
+    if (response.ok) {
+      set_message(payload.message ?? "Re-scoring complete.");
+      const refreshed = await fetch("/api/admin/reports", { credentials: "include" });
+      const refreshed_payload = await refreshed.json();
+      set_snapshot(refreshed_payload.snapshot);
+    } else {
+      set_message(payload.message ?? "Re-scoring failed. Check the assessment configuration.");
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="space-y-3">
@@ -126,6 +144,31 @@ export function ReportsManager({ initial_snapshot }: { initial_snapshot: Reports
                       </a>
                     </div>
                   </div>
+                  {assessment.scoring_status === "failed" ? (
+                    <div className="mt-3 rounded-2xl border border-brand-red/40 bg-brand-red/8 px-3 py-2 text-xs text-brand-red">
+                      <p className="font-semibold">Scoring failed — fit score and recommendation are unavailable until this is fixed.</p>
+                      {assessment.scoring_error ? (
+                        <p className="mt-1 break-words text-brand-red/85">Error: {assessment.scoring_error}</p>
+                      ) : null}
+                      {assessment.scoring_failed_at ? (
+                        <p className="mt-1 text-brand-red/70">At: {new Date(assessment.scoring_failed_at).toLocaleString("en-IN")}</p>
+                      ) : null}
+                      <span
+                        className="mt-2 inline-flex cursor-pointer items-center gap-1 rounded-full border border-brand-red px-2 py-0.5 text-[11px] font-semibold text-brand-red transition hover:bg-brand-red hover:text-brand-white"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          void handle_rescore(assessment.assessment_id);
+                        }}
+                        role="button"
+                      >
+                        Re-score this assessment
+                      </span>
+                    </div>
+                  ) : assessment.scoring_status === "pending" ? (
+                    <div className="mt-3 rounded-2xl border border-brand-black/15 bg-brand-grey px-3 py-2 text-xs text-brand-black/65">
+                      Scoring run is still pending — no role-fit result yet.
+                    </div>
+                  ) : null}
                   {assessment.templates_generated.length ? (
                     <ul className="mt-3 space-y-1 text-xs text-brand-black/70">
                       {assessment.templates_generated.map((entry) => (
